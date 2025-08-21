@@ -29,49 +29,6 @@ public class Bong {
         } 
     }
 
-    public static class Todo extends Task {
-        public Todo(String description) {
-            super(description);
-        }
-
-        @Override
-        public String toString() {
-            return "[T]" + super.toString();
-        }
-
-    }
-
-    public static class Deadline extends Task {
-        protected String deadline;
-
-        public Deadline(String description, String deadline) {
-            super(description);
-            this.deadline = deadline;
-        }
-
-        @Override
-        public String toString() {
-            return "[D]" + super.toString() + " (by: " + this.deadline + ")";
-        }
-
-    }
-
-    public static class Event extends Task {
-        protected String start;
-        protected String end;
-
-        public Event(String description, String start, String end) {
-            super(description);
-            this.start = start;
-            this.end = end;
-        }
-
-        @Override
-        public String toString() {
-            return "[E]" + super.toString() + " (from: " + this.start + " to: " + this.end + ")";
-        }
-    }
-
     public static void main(String[] args) {
         String line = "------------------------------";
 
@@ -111,29 +68,10 @@ public class Bong {
                 System.out.println("    OK, I've marked this task as not done yet:");
                 System.out.println("        " + list[taskNumber - 1].toString());
                 System.out.println(line);
-            } else if (userInput.startsWith("todo ")) {
-                list[count] = new Todo(userInput.substring(5));
-                System.out.println("    Got it. I've added this task:");
-                System.out.println("        " + list[count].toString());
-                count++;
-                System.out.println("    " + "Now you have " + count + " tasks in the list.");
-                System.out.println(line);
-            } else if (userInput.startsWith("deadline ")) {
-                String[] parts = userInput.split(" /by ");
-                list[count] = new Deadline(parts[0].substring(9), parts[1]);
-                System.out.println("    Got it. I've added this task:");
-                System.out.println("        " + list[count].toString());
-                count++;
-                System.out.println("    " + "Now you have " + count + " tasks in the list.");
-                System.out.println(line);
             } else {
-                String regex = " /from | /to ";
-                String[] parts = userInput.split(regex);
-                list[count] = new Event(parts[0].substring(6), parts[1], parts[2]);
-                System.out.println("    Got it. I've added this task:");
-                System.out.println("        " + list[count].toString());
+                list[count] = new Task(userInput);
                 count++;
-                System.out.println("    " + "Now you have " + count + " tasks in the list.");
+                System.out.println("    added: " + userInput);
                 System.out.println(line);
             }
         }

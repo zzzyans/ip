@@ -41,7 +41,8 @@ You do not have this many tasks in your list!
 ------------------------------
 You do not have this many tasks in your list!
 ------------------------------
-Hmm, I don't understand that command.
+    Hmm, I dont understand that command.
+    Please try 'todo', 'deadline', 'event', 'list', 'mark', 'unmark', 'delete' or 'bye'.
 ------------------------------
 A todo needs a description!
 ------------------------------

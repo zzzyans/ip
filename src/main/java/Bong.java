@@ -3,6 +3,10 @@ import java.util.ArrayList;
 
 public class Bong {
 
+    public static enum Command {
+        LIST, MARK, UNMARK, TODO, DEADLINE, EVENT, DELETE, UNKNOWN
+    }
+
     public static class Task {
         protected String description;
         protected boolean isDone;
@@ -89,92 +93,123 @@ public class Bong {
         String userInput;
 
         ArrayList<Task> list = new ArrayList<>();
-        int count = 0;
 
         while (true) {
             userInput = scanner.nextLine();
 
+            if (userInput.equals("bye")) {
+                System.out.println("    Bye. Hope to see you again soon!");
+                break;
+            }
+
             try {
-                if (userInput.equals("bye")) {
-                    break;
-                } else if (userInput.equals("list")) {
-                    int listNumber = 1;
-                    System.out.println("    Here are the tasks in your list:");
-                    for (int i = 0; i < count; i++) {
-                        System.out.println("    " + listNumber + ". " + list.get(i).toString());
-                        listNumber++;
-                    }
-                    System.out.println(line);
-                } else if (userInput.startsWith("mark ")) {
-                    String taskNumberString = userInput.substring(5);
-                    int taskNumber = Integer.parseInt(taskNumberString);
-                    if (taskNumber > count) {
-                        throw new BongException("You do not have this many tasks in your list!");
-                    }
-                    list.get(taskNumber - 1).mark();
-                    System.out.println("    Nice! I've marked this task as done:");
-                    System.out.println("        " + list.get(taskNumber - 1).toString());
-                    System.out.println(line);
-                } else if (userInput.startsWith("unmark ")) {
-                    String taskNumberString = userInput.substring(7);
-                    int taskNumber = Integer.parseInt(taskNumberString);
-                    if (taskNumber > count) {
-                        throw new BongException("You do not have this many tasks in your list!");
-                    }
-                    list.get(taskNumber - 1).unmark();
-                    System.out.println("    OK, I've marked this task as not done yet:");
-                    System.out.println("        " + list.get(taskNumber - 1).toString());
-                    System.out.println(line);
-                } else if (userInput.startsWith("todo ")) {
-                    String description = userInput.substring(5);
-                    if (description.isEmpty()) {
-                        throw new BongException("A todo needs a description!");
-                    }
-                    list.add(new Todo(description));
-                    System.out.println("    Got it. I've added this task:");
-                    System.out.println("        " + list.get(count).toString());
-                    count++;
-                    System.out.println("    " + "Now you have " + count + " tasks in the list.");
-                    System.out.println(line);
-                } else if (userInput.startsWith("deadline ")) {
-                    String[] parts = userInput.split(" /by ");
-                    String description = parts[0].substring(9);
-                    if (description.isBlank() || parts[1].isBlank()) {
-                        throw new BongException("Looks like your 'deadline' is missing details! Description or deadline cannot be empty.");
-                    }
-                    list.add(new Deadline(description, parts[1]));
-                    System.out.println("    Got it. I've added this task:");
-                    System.out.println("        " + list.get(count).toString());
-                    count++;
-                    System.out.println("    " + "Now you have " + count + " tasks in the list.");
-                    System.out.println(line);
-                } else if (userInput.startsWith("event ")) {
-                    String regex = " /from | /to ";
-                    String[] parts = userInput.split(regex);
-                    String description = parts[0].substring(6);
-                    if (description.isBlank() || parts[1].isBlank() || parts[2].isBlank()) {
-                        throw new BongException("Looks like your 'event' is missing details! Description, start time and end time cannot be empty.");
-                    }
-                    list.add(new Event(description, parts[1], parts[2]));
-                    System.out.println("    Got it. I've added this task:");
-                    System.out.println("        " + list.get(count).toString());
-                    count++;
-                    System.out.println("    " + "Now you have " + count + " tasks in the list.");
-                    System.out.println(line);
-                } else if (userInput.startsWith("delete ")) {
-                    String taskNumberString = userInput.substring(7);
-                    int taskNumber = Integer.parseInt(taskNumberString);
-                    if (taskNumber > count) {
-                        throw new BongException("You do not have this many tasks in your list!");
-                    }
-                    Task removedTask = list.remove(taskNumber - 1);
-                    count--;
-                    System.out.println("    Noted. I've removed this task:");
-                    System.out.println("        " + removedTask);
-                    System.out.println("    Now you have " + count + " tasks in the list.");
-                    System.out.println(line);
+                Command command = Command.UNKNOWN;
+                String commandWord = userInput.split(" ", 2)[0].toUpperCase();
+                if (commandWord.isEmpty()) {
+                    command = Command.UNKNOWN;
                 } else {
-                    throw new BongException("Hmm, I don't understand that command.");
+                    try {
+                        command = Command.valueOf(commandWord);
+                    } catch (IllegalArgumentException e) {
+
+                    }
+                } 
+
+                switch (command) {
+                    case LIST:
+                        int listNumber = 1;
+                        System.out.println("    Here are the tasks in your list:");
+                        for (int i = 0; i < list.size(); i++) {
+                            System.out.println("    " + listNumber + ". " + list.get(i).toString());
+                            listNumber++;
+                        }
+                        System.out.println(line);
+                        break;
+                    case MARK:
+                        String markNumberString = userInput.substring(5);
+                        int markNumber = Integer.parseInt(markNumberString);
+                        if (markNumber > list.size()) {
+                            throw new BongException("You do not have this many tasks in your list!");
+                        }
+                        list.get(markNumber - 1).mark();
+                        System.out.println("    Nice! I've marked this task as done:");
+                        System.out.println("        " + list.get(markNumber - 1).toString());
+                        System.out.println(line);
+                        break;
+                    case UNMARK:
+                        String unmarkNumberString = userInput.substring(7);
+                        int unmarkNumber = Integer.parseInt(unmarkNumberString);
+                        if (unmarkNumber > list.size()) {
+                            throw new BongException("You do not have this many tasks in your list!");
+                        }
+                        list.get(unmarkNumber - 1).unmark();
+                        System.out.println("    OK, I've marked this task as not done yet:");
+                        System.out.println("        " + list.get(unmarkNumber - 1).toString());
+                        System.out.println(line);
+                        break;
+                    case TODO:
+                        try {
+                            String todoDescription = userInput.substring(5);
+                            if (todoDescription.isEmpty()) {
+                                throw new BongException("A todo needs a description!");
+                            }
+                            list.add(new Todo(todoDescription));
+                            System.out.println("    Got it. I've added this task:");
+                            System.out.println("        " + list.get(list.size() - 1).toString());
+                            System.out.println("    " + "Now you have " + list.size() + " tasks in the list.");
+                            System.out.println(line);
+                            break;
+                        } catch (StringIndexOutOfBoundsException e) {
+                            throw new BongException("A todo needs a description!");
+                        }
+                    case DEADLINE:
+                        try {
+                            String[] deadlineParts = userInput.split(" /by ");
+                            String deadlineDescription = deadlineParts[0].substring(9);
+                            if (deadlineDescription.isBlank() || deadlineParts[1].isBlank()) {
+                                throw new BongException("Looks like your 'deadline' is missing details! Description or deadline cannot be empty.");
+                            }
+                            list.add(new Deadline(deadlineDescription, deadlineParts[1]));
+                            System.out.println("    Got it. I've added this task:");
+                            System.out.println("        " + list.get(list.size() - 1).toString());
+                            System.out.println("    " + "Now you have " + list.size() + " tasks in the list.");
+                            System.out.println(line);
+                            break;
+                        } catch (StringIndexOutOfBoundsException e) {
+                            throw new BongException("Looks like your 'deadline' is missing details! Description or deadline cannot be empty.");
+                        }
+                    case EVENT:
+                        try {
+                            String regex = " /from | /to ";
+                            String[] eventParts = userInput.split(regex);
+                            String description = eventParts[0].substring(6);
+                            if (description.isBlank() || eventParts[1].isBlank() || eventParts[2].isBlank()) {
+                                throw new BongException("Looks like your 'event' is missing details! Description, start time and end time cannot be empty.");
+                            }
+                            list.add(new Event(description, eventParts[1], eventParts[2]));
+                            System.out.println("    Got it. I've added this task:");
+                            System.out.println("        " + list.get(list.size() - 1).toString());
+                            System.out.println("    " + "Now you have " + list.size() + " tasks in the list.");
+                            System.out.println(line);
+                            break;
+                        } catch (StringIndexOutOfBoundsException e) {
+                            throw new BongException("Looks like your 'event' is missing details! Description, start time and end time cannot be empty.");
+                        }
+                    case DELETE:
+                        String taskNumberString = userInput.substring(7);
+                        int taskNumber = Integer.parseInt(taskNumberString);
+                        if (taskNumber > list.size()) {
+                            throw new BongException("You do not have this many tasks in your list!");
+                        }
+                        Task removedTask = list.remove(taskNumber - 1);
+                        System.out.println("    Noted. I've removed this task:");
+                        System.out.println("        " + removedTask);
+                        System.out.println("    Now you have " + list.size() + " tasks in the list.");
+                        System.out.println(line);
+                        break;
+                    case UNKNOWN:
+                    default:
+                        throw new BongException("    Hmm, I dont understand that command.\n    Please try 'todo', 'deadline', 'event', 'list', 'mark', 'unmark', 'delete' or 'bye'.");
                 }
             } catch (BongException e) { 
                 System.out.println(e.getMessage());
@@ -184,8 +219,6 @@ public class Bong {
                 System.out.println(line);
             }
         }
-
-        System.out.println("    Bye. Hope to see you again soon!");
 
         scanner.close();
     }

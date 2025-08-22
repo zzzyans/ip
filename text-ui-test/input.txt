@@ -10,7 +10,7 @@ list
 mark 3
 unmark 3
 hi
-todo 
-deadline 
-event 
+todo
+deadline
+event
 bye

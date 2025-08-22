@@ -5,8 +5,10 @@ mark 2
 list
 unmark 2
 list
-mark 4
-unmark 4
+delete 2
+list
+mark 3
+unmark 3
 hi
 todo 
 deadline 

@@ -1,4 +1,5 @@
 import java.util.Scanner;
+import java.util.ArrayList;
 
 public class Bong {
 
@@ -87,7 +88,7 @@ public class Bong {
         Scanner scanner = new Scanner(System.in);
         String userInput;
 
-        Task[] list = new Task[100];
+        ArrayList<Task> list = new ArrayList<>();
         int count = 0;
 
         while (true) {
@@ -100,7 +101,7 @@ public class Bong {
                     int listNumber = 1;
                     System.out.println("    Here are the tasks in your list:");
                     for (int i = 0; i < count; i++) {
-                        System.out.println("    " + listNumber + ". " + list[i].toString());
+                        System.out.println("    " + listNumber + ". " + list.get(i).toString());
                         listNumber++;
                     }
                     System.out.println(line);
@@ -110,9 +111,9 @@ public class Bong {
                     if (taskNumber > count) {
                         throw new BongException("You do not have this many tasks in your list!");
                     }
-                    list[taskNumber - 1].mark();
+                    list.get(taskNumber - 1).mark();
                     System.out.println("    Nice! I've marked this task as done:");
-                    System.out.println("        " + list[taskNumber - 1].toString());
+                    System.out.println("        " + list.get(taskNumber - 1).toString());
                     System.out.println(line);
                 } else if (userInput.startsWith("unmark ")) {
                     String taskNumberString = userInput.substring(7);
@@ -120,18 +121,18 @@ public class Bong {
                     if (taskNumber > count) {
                         throw new BongException("You do not have this many tasks in your list!");
                     }
-                    list[taskNumber - 1].unmark();
+                    list.get(taskNumber - 1).unmark();
                     System.out.println("    OK, I've marked this task as not done yet:");
-                    System.out.println("        " + list[taskNumber - 1].toString());
+                    System.out.println("        " + list.get(taskNumber - 1).toString());
                     System.out.println(line);
                 } else if (userInput.startsWith("todo ")) {
                     String description = userInput.substring(5);
                     if (description.isEmpty()) {
                         throw new BongException("A todo needs a description!");
                     }
-                    list[count] = new Todo(description);
+                    list.add(new Todo(description));
                     System.out.println("    Got it. I've added this task:");
-                    System.out.println("        " + list[count].toString());
+                    System.out.println("        " + list.get(count).toString());
                     count++;
                     System.out.println("    " + "Now you have " + count + " tasks in the list.");
                     System.out.println(line);
@@ -141,9 +142,9 @@ public class Bong {
                     if (description.isBlank() || parts[1].isBlank()) {
                         throw new BongException("Looks like your 'deadline' is missing details! Description or deadline cannot be empty.");
                     }
-                    list[count] = new Deadline(description, parts[1]);
+                    list.add(new Deadline(description, parts[1]));
                     System.out.println("    Got it. I've added this task:");
-                    System.out.println("        " + list[count].toString());
+                    System.out.println("        " + list.get(count).toString());
                     count++;
                     System.out.println("    " + "Now you have " + count + " tasks in the list.");
                     System.out.println(line);
@@ -154,11 +155,23 @@ public class Bong {
                     if (description.isBlank() || parts[1].isBlank() || parts[2].isBlank()) {
                         throw new BongException("Looks like your 'event' is missing details! Description, start time and end time cannot be empty.");
                     }
-                    list[count] = new Event(description, parts[1], parts[2]);
+                    list.add(new Event(description, parts[1], parts[2]));
                     System.out.println("    Got it. I've added this task:");
-                    System.out.println("        " + list[count].toString());
+                    System.out.println("        " + list.get(count).toString());
                     count++;
                     System.out.println("    " + "Now you have " + count + " tasks in the list.");
+                    System.out.println(line);
+                } else if (userInput.startsWith("delete ")) {
+                    String taskNumberString = userInput.substring(7);
+                    int taskNumber = Integer.parseInt(taskNumberString);
+                    if (taskNumber > count) {
+                        throw new BongException("You do not have this many tasks in your list!");
+                    }
+                    Task removedTask = list.remove(taskNumber - 1);
+                    count--;
+                    System.out.println("    Noted. I've removed this task:");
+                    System.out.println("        " + removedTask);
+                    System.out.println("    Now you have " + count + " tasks in the list.");
                     System.out.println(line);
                 } else {
                     throw new BongException("Hmm, I don't understand that command.");

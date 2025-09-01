@@ -5,6 +5,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -13,6 +16,8 @@ import java.util.Scanner;
  * Bong is a simple task management command-line application.
  * It allows users to add, list, mark, unmark, and delete tasks.
  * Tasks can be Todos, Deadlines, or Events.
+ * Tasks are persisted to ./data/bong.txt.
+ * Supports date and time for Deadlines and Events.
  */
 public class Bong {
 
@@ -22,6 +27,21 @@ public class Bong {
     private static final Path STORAGE_PATH = Paths.get(DATA_DIR, DATA_FILE);
 
     private static final String LINE = "------------------------------";
+
+    private static final String DEADLINE_DELIM = " /by ";
+    private static final String FROM_DELIM = " /from ";
+    private static final String TO_DELIM = " /to ";
+
+    // Input date/time format for parsing user input
+    private static final DateTimeFormatter INPUT_DATE_TIME_FORMAT =
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
+
+    // Output date/time format for saving to file
+    private static final DateTimeFormatter OUTPUT_DATE_TIME_FORMAT =  
+        DateTimeFormatter.ofPattern("MMM dd yyyy, HH:mm");
+
+    private static final DateTimeFormatter STORAGE_DATE_TIME_FORMAT =  
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm"); 
 
     /*
      * Command represents the supported user command types.
@@ -78,45 +98,57 @@ public class Bong {
     }
 
     public static class Deadline extends Task {
-        protected String deadline;
+        protected LocalDateTime deadline;
 
-        public Deadline(String description, String deadline) {
+        public Deadline(String description, String deadline) throws BongException {
             super(description);
-            this.deadline = deadline;
+            try {
+                this.deadline = LocalDateTime.parse(deadline, INPUT_DATE_TIME_FORMAT);
+            } catch (DateTimeParseException e) {
+                throw new BongException("   Invalid deadline date/time format!\n    Please use 'yyyy-MM-dd HHmm' (eg. 2019-10-15 1800).");
+            }
         }
 
-        public String getDeadline() {
+        public LocalDateTime getDeadline() {
             return this.deadline;
         }
 
         @Override
         public String toString() {
-            return "[D]" + super.toString() + " (by: " + this.deadline + ")";
+            return "[D]" + super.toString() + " (by: " + this.deadline.format(OUTPUT_DATE_TIME_FORMAT) + ")";
         }
 
     }
 
     public static class Event extends Task {
-        protected String start;
-        protected String end;
+        protected LocalDateTime start;
+        protected LocalDateTime end;
 
-        public Event(String description, String start, String end) {
+        public Event(String description, String start, String end) throws BongException {
             super(description);
-            this.start = start;
-            this.end = end;
+            try {
+                this.start = LocalDateTime.parse(start, INPUT_DATE_TIME_FORMAT);
+            } catch (DateTimeParseException e) {
+                throw new BongException("   Invalid event start date/time format!\n    Please use 'yyyy-MM-dd HHmm' (eg. 2019-10-15 1800).");
+            }
+            try {
+                this.end = LocalDateTime.parse(end, INPUT_DATE_TIME_FORMAT);
+            } catch (DateTimeParseException e) {
+                throw new BongException("   Invalid event end date/time format!\n    Please use 'yyyy-MM-dd HHmm' (eg. 2019-10-15 1800).");
+            }
         }
 
-        public String getStart() {
+        public LocalDateTime getStart() {
             return this.start;
         }
 
-        public String getEnd() {
+        public LocalDateTime getEnd() {
             return this.end;
         }
 
         @Override
         public String toString() {
-            return "[E]" + super.toString() + " (from: " + this.start + " to: " + this.end + ")";
+            return "[E]" + super.toString() + " (from "+ this.start.format(OUTPUT_DATE_TIME_FORMAT) + " to " + this.end.format(OUTPUT_DATE_TIME_FORMAT) + ")";
         }
     }
 
@@ -224,9 +256,9 @@ public class Bong {
                         }
                     case DEADLINE:
                         try {
-                            String[] deadlineParts = userInput.split(" /by ", 2);
+                            String[] deadlineParts = userInput.split(DEADLINE_DELIM, 2);
                             if (deadlineParts.length < 2) {
-                                throw new BongException("Looks like your 'deadline' is missing details! Format: deadline <description> /by time");
+                                throw new BongException("Looks like your 'deadline' is missing details! Try 'deadline <description> /by <yyyy-MM-dd HHmm>.'");
                             }
                             String deadlineDescription = deadlineParts[0].substring(9).trim();
                             String deadlineTime = deadlineParts[1].trim();
@@ -241,14 +273,14 @@ public class Bong {
                             saveTasks(tasks);
                             break;
                         } catch (StringIndexOutOfBoundsException e) {
-                            throw new BongException("Looks like your 'deadline' is missing details! Format: deadline <description> /by time");
+                            throw new BongException("Looks like your 'deadline' is missing details! Try 'deadline <description> /by <yyyy-MM-dd HHmm>.'");
                         }
                     case EVENT:
                         try {
                             String regex = " /from | /to ";
                             String[] eventParts = userInput.split(regex, 3);
                             if (eventParts.length < 3) {
-                                throw new BongException("Looks like your 'event' is missing details! Format: event <description> /from <start time> /to <end time>");
+                                throw new BongException("Looks like your 'event' is missing details! Try 'event <description> /from <yyyy-MM-dd HHmm> /to <yyyy-MM-dd HHmm>.'");
                             }
                             String description = eventParts[0].substring(6).trim();
                             String startTime = eventParts[1].trim();
@@ -325,6 +357,7 @@ public class Bong {
             // Expect at least: type | done | description
             if (parts.length < 3) {
                 System.out.println("    Warning: Skipping corrupted line in storage: " + line);
+                System.out.println(LINE);
                 continue;
             }
             String type = parts[0].trim();
@@ -343,27 +376,32 @@ public class Bong {
                         if (parts.length < 4) {
                             throw new IllegalArgumentException("missing deadline field");
                         }
-                        Task deadline = new Deadline(parts[2].trim(), parts[3].trim());
+                        LocalDateTime deadline = LocalDateTime.parse(parts[3].trim(), STORAGE_DATE_TIME_FORMAT);
+                        Deadline deadlineTask = new Deadline(parts[2].trim(), deadline.format(INPUT_DATE_TIME_FORMAT));
                         if (done) {
-                            deadline.mark();
+                            deadlineTask.mark();
                         }
-                        tasks.add(deadline);
+                        tasks.add(deadlineTask);
                         break;
                     case "E":
                         if (parts.length < 5) {
                             throw new IllegalArgumentException("missing event fields");
                         }
-                        Task event = new Event(parts[2].trim(), parts[3].trim(), parts[4].trim());
+                        LocalDateTime start = LocalDateTime.parse(parts[3].trim(), STORAGE_DATE_TIME_FORMAT);
+                        LocalDateTime end = LocalDateTime.parse(parts[4].trim(), STORAGE_DATE_TIME_FORMAT);
+                        Event eventTask = new Event(parts[2].trim(), start.format(INPUT_DATE_TIME_FORMAT), end.format(INPUT_DATE_TIME_FORMAT));
                         if (done) {
-                            event.mark();
+                            eventTask.mark();
                         }
-                        tasks.add(event);
+                        tasks.add(eventTask);
                         break;
                     default:
                         System.out.println("    Warning: Skipping unknown task type in storage: " + line);
+                        System.out.println(LINE);
                 }
             } catch (Exception e ) {
                 System.out.println("    Warning: Skipping corrupted line in storage: " + line);
+                System.out.println(LINE);
             }
         }
     }
@@ -400,10 +438,11 @@ public class Bong {
             return "T" + " | " + doneFlag + " | " + task.getDescription();
         } else if (task instanceof Deadline) {
             Deadline d = (Deadline) task;
-            return "D" + " | " + doneFlag + " | " + d.getDescription() + " | " + d.getDeadline();
+            return "D" + " | " + doneFlag + " | " + d.getDescription() + " | " + d.getDeadline().format(STORAGE_DATE_TIME_FORMAT);
         } else if (task instanceof Event) {
             Event e = (Event) task;
-            return "E" + " | " + doneFlag + " | " + e.getDescription() + " | " + e.getStart() + " to " + e.getEnd();
+            return "E" + " | " + doneFlag + " | " + e.getDescription() + " | " + 
+                e.getStart().format(STORAGE_DATE_TIME_FORMAT) + " to " + e.getEnd().format(STORAGE_DATE_TIME_FORMAT);
         }
         return "T" + " | " + doneFlag + " | " + task.getDescription();
     }

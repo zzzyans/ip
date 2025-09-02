@@ -7,10 +7,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 /*
  * Bong is a simple task management command-line application.
@@ -29,16 +27,6 @@ public class Bong {
     private static final String LINE = "------------------------------";
 
     private static final String DEADLINE_DELIM = " /by ";
-    private static final String FROM_DELIM = " /from ";
-    private static final String TO_DELIM = " /to ";
-
-    // Input date/time format for parsing user input
-    private static final DateTimeFormatter INPUT_DATE_TIME_FORMAT =
-        DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
-
-    // Output date/time format for saving to file
-    private static final DateTimeFormatter OUTPUT_DATE_TIME_FORMAT =  
-        DateTimeFormatter.ofPattern("MMM dd yyyy, HH:mm");
 
     private static final DateTimeFormatter STORAGE_DATE_TIME_FORMAT =  
         DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm"); 
@@ -50,114 +38,6 @@ public class Bong {
         LIST, MARK, UNMARK, TODO, DEADLINE, EVENT, DELETE, UNKNOWN
     }
 
-    public static class Task {
-        protected String description;
-        protected boolean isDone;
-    
-        public Task(String description) {
-            this.description = description;
-            this.isDone = false;
-        }
-    
-        public String getStatusIcon() {
-            return (this.isDone ? "X" : " "); 
-        }
-
-        public String getDescription() {
-            return this.description;
-        }
-
-        public boolean isDone() {
-            return this.isDone;
-        }
-
-        public void mark() {
-            this.isDone = true;
-        }
-
-        public void unmark() {
-            this.isDone = false;
-        }
-
-        @Override
-        public String toString() {
-            return "[" + this.getStatusIcon() + "] " + this.description;
-        } 
-    }
-
-    public static class Todo extends Task {
-        public Todo(String description) {
-            super(description);
-        }
-
-        @Override
-        public String toString() {
-            return "[T]" + super.toString();
-        }
-
-    }
-
-    public static class Deadline extends Task {
-        protected LocalDateTime deadline;
-
-        public Deadline(String description, String deadline) throws BongException {
-            super(description);
-            try {
-                this.deadline = LocalDateTime.parse(deadline, INPUT_DATE_TIME_FORMAT);
-            } catch (DateTimeParseException e) {
-                throw new BongException("   Invalid deadline date/time format!\n    Please use 'yyyy-MM-dd HHmm' (eg. 2019-10-15 1800).");
-            }
-        }
-
-        public LocalDateTime getDeadline() {
-            return this.deadline;
-        }
-
-        @Override
-        public String toString() {
-            return "[D]" + super.toString() + " (by: " + this.deadline.format(OUTPUT_DATE_TIME_FORMAT) + ")";
-        }
-
-    }
-
-    public static class Event extends Task {
-        protected LocalDateTime start;
-        protected LocalDateTime end;
-
-        public Event(String description, String start, String end) throws BongException {
-            super(description);
-            try {
-                this.start = LocalDateTime.parse(start, INPUT_DATE_TIME_FORMAT);
-            } catch (DateTimeParseException e) {
-                throw new BongException("   Invalid event start date/time format!\n    Please use 'yyyy-MM-dd HHmm' (eg. 2019-10-15 1800).");
-            }
-            try {
-                this.end = LocalDateTime.parse(end, INPUT_DATE_TIME_FORMAT);
-            } catch (DateTimeParseException e) {
-                throw new BongException("   Invalid event end date/time format!\n    Please use 'yyyy-MM-dd HHmm' (eg. 2019-10-15 1800).");
-            }
-        }
-
-        public LocalDateTime getStart() {
-            return this.start;
-        }
-
-        public LocalDateTime getEnd() {
-            return this.end;
-        }
-
-        @Override
-        public String toString() {
-            return "[E]" + super.toString() + " (from "+ this.start.format(OUTPUT_DATE_TIME_FORMAT) + " to " + this.end.format(OUTPUT_DATE_TIME_FORMAT) + ")";
-        }
-    }
-
-    public static class BongException extends Exception {
-        public BongException(String msg) {
-            super(msg);
-        }
-    }
-
     /*
      * Main method to run the Bong application.
      * It initialises the task list, loads existing tasks, and processes user commands.
@@ -166,10 +46,9 @@ public class Bong {
      */
     public static void main(String[] args) {
 
-        System.out.println("    Hello! I'm Bong!\n    What can I do for you?");
-        System.out.println(LINE);
+        Ui ui = new Ui();
+        ui.showWelcome();
 
-        Scanner scanner = new Scanner(System.in);
         String userInput;
 
         List<Task> tasks = new ArrayList<>();
@@ -177,15 +56,14 @@ public class Bong {
         try {
             loadTasks(tasks);
         } catch (IOException e) {
-            System.out.println("    Failed to load tasks: " + e.getMessage());
-            System.out.println(LINE);
+            ui.showLoadingError(e.getMessage());
         }
 
         while (true) {
-            userInput = scanner.nextLine();
+            userInput = ui.readCommand();
 
             if (userInput.equals("bye")) {
-                System.out.println("    Bye. Hope to see you again soon!");
+                ui.showExitMessage();
                 break;
             }
 
@@ -206,13 +84,7 @@ public class Bong {
 
                 switch (command) {
                     case LIST:
-                        int listNumber = 1;
-                        System.out.println("    Here are the tasks in your list:");
-                        for (int i = 0; i < tasks.size(); i++) {
-                            System.out.println("    " + listNumber + ". " + tasks.get(i).toString());
-                            listNumber++;
-                        }
-                        System.out.println(LINE);
+                        ui.showTaskList(tasks);
                         break;
                     case MARK:
                         String markNumberString = userInput.substring(5);
@@ -221,9 +93,7 @@ public class Bong {
                             throw new BongException("You do not have this many tasks in your list!");
                         }
                         tasks.get(markNumber - 1).mark();
-                        System.out.println("    Nice! I've marked this task as done:");
-                        System.out.println("        " + tasks.get(markNumber - 1).toString());
-                        System.out.println(LINE);
+                        ui.showMarkedTask(tasks.get(markNumber - 1));
                         saveTasks(tasks);
                         break;
                     case UNMARK:
@@ -233,9 +103,7 @@ public class Bong {
                             throw new BongException("You do not have this many tasks in your list!");
                         }
                         tasks.get(unmarkNumber - 1).unmark();
-                        System.out.println("    OK, I've marked this task as not done yet:");
-                        System.out.println("        " + tasks.get(unmarkNumber - 1).toString());
-                        System.out.println(LINE);
+                        ui.showUnmarkedTask(tasks.get(unmarkNumber - 1));
                         saveTasks(tasks);
                         break;
                     case TODO:
@@ -245,10 +113,7 @@ public class Bong {
                                 throw new BongException("A todo needs a description!");
                             }
                             tasks.add(new Todo(todoDescription));
-                            System.out.println("    Got it. I've added this task:");
-                            System.out.println("        " + tasks.get(tasks.size() - 1).toString());
-                            System.out.println("    " + "Now you have " + tasks.size() + " tasks in the list.");
-                            System.out.println(LINE);
+                            ui.showAddedTask(tasks.get(tasks.size() - 1), tasks.size());
                             saveTasks(tasks);
                             break;
                         } catch (StringIndexOutOfBoundsException e) {
@@ -266,10 +131,7 @@ public class Bong {
                                 throw new BongException("Looks like your 'deadline' is missing details! Description or deadline cannot be empty.");
                             }
                             tasks.add(new Deadline(deadlineDescription, deadlineTime));
-                            System.out.println("    Got it. I've added this task:");
-                            System.out.println("        " + tasks.get(tasks.size() - 1).toString());
-                            System.out.println("    " + "Now you have " + tasks.size() + " tasks in the list.");
-                            System.out.println(LINE);
+                            ui.showAddedTask(tasks.get(tasks.size() - 1), tasks.size());
                             saveTasks(tasks);
                             break;
                         } catch (StringIndexOutOfBoundsException e) {
@@ -289,10 +151,7 @@ public class Bong {
                                 throw new BongException("Looks like your 'event' is missing details! Description, start time and end time cannot be empty.");
                             }
                             tasks.add(new Event(description, eventParts[1], eventParts[2]));
-                            System.out.println("    Got it. I've added this task:");
-                            System.out.println("        " + tasks.get(tasks.size() - 1).toString());
-                            System.out.println("    " + "Now you have " + tasks.size() + " tasks in the list.");
-                            System.out.println(LINE);
+                            ui.showAddedTask(tasks.get(tasks.size() - 1), tasks.size());
                             saveTasks(tasks);
                             break;
                         } catch (StringIndexOutOfBoundsException e) {
@@ -305,10 +164,7 @@ public class Bong {
                             throw new BongException("You do not have this many tasks in your list!");
                         }
                         Task removedTask = tasks.remove(taskNumber - 1);
-                        System.out.println("    Noted. I've removed this task:");
-                        System.out.println("        " + removedTask);
-                        System.out.println("    Now you have " + tasks.size() + " tasks in the list.");
-                        System.out.println(LINE);
+                        ui.showRemovedTask(removedTask, tasks.size());
                         saveTasks(tasks);
                         break;
                     case UNKNOWN:
@@ -316,18 +172,15 @@ public class Bong {
                         throw new BongException("    Hmm, I dont understand that command.\n    Please try 'todo', 'deadline', 'event', 'list', 'mark', 'unmark', 'delete' or 'bye'.");
                 }
             } catch (NumberFormatException e) {
-                System.out.println("    The task number provided is invalid. Please enter a valid number.");
-                System.out.println(LINE);
+                ui.showError("    The task number provided is invalid. Please enter a valid number.");
             } catch (BongException e) { 
-                System.out.println(e.getMessage());
-                System.out.println(LINE);
+                ui.showError(e.getMessage());
             } catch (Exception e) {
-                System.out.println("An unexpected error occurred: " + e.getMessage());
-                System.out.println(LINE);
+                ui.showError("An unexpected error occurred: " + e.getMessage());
             }
         }
 
-        scanner.close();
+        ui.closeScanner();
     }
 
     /*
@@ -364,6 +217,9 @@ public class Bong {
             boolean done = parts[1].trim().equals("1") || parts[1].trim().equalsIgnoreCase("true");
 
             try {
+
+                DateTimeFormatter inpuDateTimeFormatForTaskConstructors = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
+
                 switch (type) {
                     case "T":
                         Task todo = new Todo(parts[2].trim());
@@ -377,7 +233,7 @@ public class Bong {
                             throw new IllegalArgumentException("missing deadline field");
                         }
                         LocalDateTime deadline = LocalDateTime.parse(parts[3].trim(), STORAGE_DATE_TIME_FORMAT);
-                        Deadline deadlineTask = new Deadline(parts[2].trim(), deadline.format(INPUT_DATE_TIME_FORMAT));
+                        Deadline deadlineTask = new Deadline(parts[2].trim(), deadline.format(inpuDateTimeFormatForTaskConstructors));
                         if (done) {
                             deadlineTask.mark();
                         }
@@ -389,7 +245,7 @@ public class Bong {
                         }
                         LocalDateTime start = LocalDateTime.parse(parts[3].trim(), STORAGE_DATE_TIME_FORMAT);
                         LocalDateTime end = LocalDateTime.parse(parts[4].trim(), STORAGE_DATE_TIME_FORMAT);
-                        Event eventTask = new Event(parts[2].trim(), start.format(INPUT_DATE_TIME_FORMAT), end.format(INPUT_DATE_TIME_FORMAT));
+                        Event eventTask = new Event(parts[2].trim(), start.format(inpuDateTimeFormatForTaskConstructors), end.format(inpuDateTimeFormatForTaskConstructors));
                         if (done) {
                             eventTask.mark();
                         }
@@ -442,7 +298,7 @@ public class Bong {
         } else if (task instanceof Event) {
             Event e = (Event) task;
             return "E" + " | " + doneFlag + " | " + e.getDescription() + " | " + 
-                e.getStart().format(STORAGE_DATE_TIME_FORMAT) + " to " + e.getEnd().format(STORAGE_DATE_TIME_FORMAT);
+                e.getStart().format(STORAGE_DATE_TIME_FORMAT) + " | " + e.getEnd().format(STORAGE_DATE_TIME_FORMAT);
         }
         return "T" + " | " + doneFlag + " | " + task.getDescription();
     }

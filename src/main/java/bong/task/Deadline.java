@@ -1,6 +1,10 @@
+package bong.task;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+
+import bong.exception.BongException;
 
 public class Deadline extends Task {
     protected LocalDateTime deadline;

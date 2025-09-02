@@ -1,4 +1,16 @@
+package bong;
+
 import java.io.IOException;
+
+import bong.ui.Ui;
+import bong.storage.Storage;
+import bong.parser.Parser;
+import bong.task.Task;
+import bong.task.Todo;
+import bong.task.Deadline;
+import bong.task.Event;
+import bong.task.TaskList;
+import bong.exception.BongException;
 
 /*
  * Bong is a simple task management command-line application.

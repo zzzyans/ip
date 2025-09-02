@@ -1,6 +1,4 @@
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /*
  * Bong is a simple task management command-line application.
@@ -24,7 +22,7 @@ public class Bong {
     // Instance variables for the core components
     private Ui ui;
     private Storage storage;
-    private List<Task> tasks;
+    private TaskList tasks;
 
     /*
      * Constructs a Bong application instance.
@@ -34,10 +32,10 @@ public class Bong {
         ui = new Ui();
         storage = new Storage(filePath);
         try {
-            tasks = storage.loadTasks(ui);
+            tasks = new TaskList(storage.loadTasks(ui));
         } catch (IOException e) {
             ui.showLoadingError(e.getMessage());
-            tasks = new ArrayList<>();
+            tasks = new TaskList();
         }
     }
 
@@ -60,50 +58,40 @@ public class Bong {
 
                 switch (parsedCommand.command) {
                     case LIST:
-                        ui.showTaskList(tasks);
+                        ui.showTaskList(tasks.getTasks());
                         break;
                     case MARK:
-                        int markNumber = parsedCommand.taskNumber;
-                        if (markNumber > tasks.size() || markNumber <= 0) {
-                            throw new BongException("You do not have this many tasks in your list!");
-                        }
-                        tasks.get(markNumber - 1).mark();
-                        ui.showMarkedTask(tasks.get(markNumber - 1));
-                        storage.saveTasks(tasks);
+                        Task markedTask = tasks.markTask(parsedCommand.taskNumber);
+                        ui.showMarkedTask(markedTask);
+                        storage.saveTasks(tasks.getTasks());
                         break;
-
                     case UNMARK:
-                        int unmarkNumber = parsedCommand.taskNumber;
-                        if (unmarkNumber > tasks.size() || unmarkNumber <= 0) {
-                            throw new BongException("You do not have this many tasks in your list!");
-                        }
-                        tasks.get(unmarkNumber - 1).unmark();
-                        ui.showUnmarkedTask(tasks.get(unmarkNumber - 1));
-                        storage.saveTasks(tasks);
+                        Task unmarkedTask = tasks.unmarkTask(parsedCommand.taskNumber);
+                        ui.showUnmarkedTask(unmarkedTask);
+                        storage.saveTasks(tasks.getTasks());
                         break;
                     case TODO:
-                        tasks.add(new Todo(parsedCommand.description));
-                        ui.showAddedTask(tasks.get(tasks.size() - 1), tasks.size());
-                        storage.saveTasks(tasks);
+                        Task newTodo = new Todo(parsedCommand.description);
+                        tasks.addTask(newTodo);
+                        ui.showAddedTask(newTodo, tasks.size());
+                        storage.saveTasks(tasks.getTasks());
                         break;
                     case DEADLINE:
-                        tasks.add(new Deadline(parsedCommand.description, parsedCommand.deadline));
-                        ui.showAddedTask(tasks.get(tasks.size() - 1), tasks.size());
-                        storage.saveTasks(tasks);
+                        Task newDeadline = new Deadline(parsedCommand.description, parsedCommand.deadline);
+                        tasks.addTask(newDeadline);
+                        ui.showAddedTask(newDeadline, tasks.size());
+                        storage.saveTasks(tasks.getTasks());
                         break;
                     case EVENT:
-                        tasks.add(new Event(parsedCommand.description, parsedCommand.eventStart, parsedCommand.eventEnd));
-                        ui.showAddedTask(tasks.get(tasks.size() - 1), tasks.size());
-                        storage.saveTasks(tasks);
+                        Task newEvent = new Event(parsedCommand.description, parsedCommand.eventStart, parsedCommand.eventEnd);
+                        tasks.addTask(newEvent);
+                        ui.showAddedTask(newEvent, tasks.size());
+                        storage.saveTasks(tasks.getTasks());
                         break;
                     case DELETE:
-                        int taskNumber = parsedCommand.taskNumber;
-                        if (taskNumber > tasks.size() || taskNumber <= 0) {
-                            throw new BongException("You do not have this many tasks in your list!");
-                        }
-                        Task removedTask = tasks.remove(taskNumber - 1);
+                        Task removedTask = tasks.deleteTask(parsedCommand.taskNumber);
                         ui.showRemovedTask(removedTask, tasks.size());
-                        storage.saveTasks(tasks);
+                        storage.saveTasks(tasks.getTasks());
                         break;
                     case UNKNOWN:
                         throw new BongException("Command UNKNOWN was return by Parser without an exception.");

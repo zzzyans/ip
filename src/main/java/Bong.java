@@ -14,8 +14,6 @@ public class Bong {
     /* Storage configuration */
     private static final String FILE_PATH = "data/bong.txt";
 
-    private static final String DEADLINE_DELIM = " /by ";
-
     /*
      * Command represents the supported user command types.
      */
@@ -49,36 +47,23 @@ public class Bong {
         boolean isExit = false;
 
         while (!isExit) {
-            String userInput = ui.readCommand();
+            String fullCommand = ui.readCommand();
             
-            if (userInput.equals("bye")) {
+            if (fullCommand.equals("bye")) {
                 ui.showExitMessage();
                 isExit = true;
                 continue;
             }
 
             try {
-                Command command = Command.UNKNOWN;
+                Parser.ParsedCommand parsedCommand = Parser.parse(fullCommand);
 
-                String[] inputParts = userInput.split(" ", 2);
-                String commandWord = inputParts[0].toUpperCase();
-                if (commandWord.isEmpty()) {
-                    command = Command.UNKNOWN;
-                } else {
-                    try {
-                        command = Command.valueOf(commandWord);
-                    } catch (IllegalArgumentException e) {
-
-                    }
-                } 
-
-                switch (command) {
+                switch (parsedCommand.command) {
                     case LIST:
                         ui.showTaskList(tasks);
                         break;
                     case MARK:
-                        String markNumberString = userInput.substring(5);
-                        int markNumber = Integer.parseInt(markNumberString);
+                        int markNumber = parsedCommand.taskNumber;
                         if (markNumber > tasks.size() || markNumber <= 0) {
                             throw new BongException("You do not have this many tasks in your list!");
                         }
@@ -86,9 +71,9 @@ public class Bong {
                         ui.showMarkedTask(tasks.get(markNumber - 1));
                         storage.saveTasks(tasks);
                         break;
+
                     case UNMARK:
-                        String unmarkNumberString = userInput.substring(7);
-                        int unmarkNumber = Integer.parseInt(unmarkNumberString);
+                        int unmarkNumber = parsedCommand.taskNumber;
                         if (unmarkNumber > tasks.size() || unmarkNumber <= 0) {
                             throw new BongException("You do not have this many tasks in your list!");
                         }
@@ -97,59 +82,22 @@ public class Bong {
                         storage.saveTasks(tasks);
                         break;
                     case TODO:
-                        try {
-                            String todoDescription = userInput.substring(5).trim();
-                            if (todoDescription.isEmpty()) {
-                                throw new BongException("A todo needs a description!");
-                            }
-                            tasks.add(new Todo(todoDescription));
-                            ui.showAddedTask(tasks.get(tasks.size() - 1), tasks.size());
-                            storage.saveTasks(tasks);
-                            break;
-                        } catch (StringIndexOutOfBoundsException e) {
-                            throw new BongException("A todo needs a description!");
-                        }
+                        tasks.add(new Todo(parsedCommand.description));
+                        ui.showAddedTask(tasks.get(tasks.size() - 1), tasks.size());
+                        storage.saveTasks(tasks);
+                        break;
                     case DEADLINE:
-                        try {
-                            String[] deadlineParts = userInput.split(DEADLINE_DELIM, 2);
-                            if (deadlineParts.length < 2) {
-                                throw new BongException("Looks like your 'deadline' is missing details! Try 'deadline <description> /by <yyyy-MM-dd HHmm>.'");
-                            }
-                            String deadlineDescription = deadlineParts[0].substring(9).trim();
-                            String deadlineTime = deadlineParts[1].trim();
-                            if (deadlineDescription.isEmpty() || deadlineTime.isEmpty()) {
-                                throw new BongException("Looks like your 'deadline' is missing details! Description or deadline cannot be empty.");
-                            }
-                            tasks.add(new Deadline(deadlineDescription, deadlineTime));
-                            ui.showAddedTask(tasks.get(tasks.size() - 1), tasks.size());
-                            storage.saveTasks(tasks);
-                            break;
-                        } catch (StringIndexOutOfBoundsException e) {
-                            throw new BongException("Looks like your 'deadline' is missing details! Try 'deadline <description> /by <yyyy-MM-dd HHmm>.'");
-                        }
+                        tasks.add(new Deadline(parsedCommand.description, parsedCommand.deadline));
+                        ui.showAddedTask(tasks.get(tasks.size() - 1), tasks.size());
+                        storage.saveTasks(tasks);
+                        break;
                     case EVENT:
-                        try {
-                            String regex = " /from | /to ";
-                            String[] eventParts = userInput.split(regex, 3);
-                            if (eventParts.length < 3) {
-                                throw new BongException("Looks like your 'event' is missing details! Try 'event <description> /from <yyyy-MM-dd HHmm> /to <yyyy-MM-dd HHmm>.'");
-                            }
-                            String description = eventParts[0].substring(6).trim();
-                            String startTime = eventParts[1].trim();
-                            String endTime = eventParts[2].trim();
-                            if (description.isEmpty() || startTime.isEmpty() || endTime.isEmpty()) {
-                                throw new BongException("Looks like your 'event' is missing details! Description, start time and end time cannot be empty.");
-                            }
-                            tasks.add(new Event(description, eventParts[1], eventParts[2]));
-                            ui.showAddedTask(tasks.get(tasks.size() - 1), tasks.size());
-                            storage.saveTasks(tasks);
-                            break;
-                        } catch (StringIndexOutOfBoundsException e) {
-                            throw new BongException("Looks like your 'event' is missing details! Description, start time and end time cannot be empty.");
-                        }
+                        tasks.add(new Event(parsedCommand.description, parsedCommand.eventStart, parsedCommand.eventEnd));
+                        ui.showAddedTask(tasks.get(tasks.size() - 1), tasks.size());
+                        storage.saveTasks(tasks);
+                        break;
                     case DELETE:
-                        String taskNumberString = userInput.substring(7);
-                        int taskNumber = Integer.parseInt(taskNumberString);
+                        int taskNumber = parsedCommand.taskNumber;
                         if (taskNumber > tasks.size() || taskNumber <= 0) {
                             throw new BongException("You do not have this many tasks in your list!");
                         }
@@ -158,11 +106,8 @@ public class Bong {
                         storage.saveTasks(tasks);
                         break;
                     case UNKNOWN:
-                    default:
-                        throw new BongException("    Hmm, I dont understand that command.\n    Please try 'todo', 'deadline', 'event', 'list', 'mark', 'unmark', 'delete' or 'bye'.");
+                        throw new BongException("Command UNKNOWN was return by Parser without an exception.");
                 }
-            } catch (NumberFormatException e) {
-                ui.showError("    The task number provided is invalid. Please enter a valid number.");
             } catch (BongException e) { 
                 ui.showError(e.getMessage());
             } catch (IOException e) {

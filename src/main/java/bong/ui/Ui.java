@@ -1,5 +1,9 @@
+package bong.ui;
+
 import java.util.List;
 import java.util.Scanner;
+
+import bong.task.Task;
 
 public class Ui {
     private Scanner scanner;

@@ -12,7 +12,7 @@ import bong.task.Event;
 import bong.task.TaskList;
 import bong.exception.BongException;
 
-/*
+/**
  * Bong is a simple task management command-line application.
  * It allows users to add, list, mark, unmark, and delete tasks.
  * Tasks can be Todos, Deadlines, or Events.
@@ -24,7 +24,7 @@ public class Bong {
     /* Storage configuration */
     private static final String FILE_PATH = "data/bong.txt";
 
-    /*
+    /**
      * Command represents the supported user command types.
      */
     public static enum Command {
@@ -36,9 +36,11 @@ public class Bong {
     private Storage storage;
     private TaskList tasks;
 
-    /*
+    /**
      * Constructs a Bong application instance.
      * Initialises UI, Storage, and loads tasks.
+     *
+     * @param filePath Path to the file where tasks are stored.
      */
     public Bong(String filePath) {
         ui = new Ui();
@@ -51,6 +53,11 @@ public class Bong {
         }
     }
 
+    /**
+     * Runs the main loop of the Bong application.
+     * It displays a welcome message, continuously reads user commands,
+     * processes them, and saves tasks until the "bye" command is entered.
+     */
     public void run() {
         ui.showWelcome();
 
@@ -120,8 +127,9 @@ public class Bong {
         ui.closeScanner();
     }
 
-    /*
+    /**
      * Main method to launch the Bong application.
+     * Creates an instance of Bong and runs it.
      * 
      * @param args Command line arguments (unused).
      */

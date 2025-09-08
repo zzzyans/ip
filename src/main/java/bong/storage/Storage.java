@@ -17,6 +17,12 @@ import bong.task.Event;
 import bong.task.Task;
 import bong.task.Todo;
 
+/**
+ * Deals with loading tasks from the file and saving tasks in the file.
+ * The Storage class handles all file I/O operations for the Bong application,
+ * including creating the data directory and file if they do not exist,
+ * parsing stored task data, and serialising tasks for persistence.
+ */
 public class Storage {
     private final Path filePath;
 
@@ -26,16 +32,22 @@ public class Storage {
     private static final DateTimeFormatter INPUT_DATE_TIME_FORMAT =
         DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
 
+    /**
+     * Constructs a Storage object with the specified file path.
+     *
+     * @param filePath The string representation of the path to the storage file.
+     */
     public Storage(String filePath) {
         this.filePath = Paths.get(filePath);
     }
 
-    /*
-     * Loads tasks from the from the storage file into the provided task list.
+    /**
+     * Loads tasks from the storage file into a list of Task objects.
      * If the data directory or file does not exist, it will be created.
-     * Corrupted lines in the storage file will be skipped with a warning.
+     * Corrupted lines in the storage file will be skipped with a warning displayed via the UI.
      * 
-     * @param tasks The list where loaded tasks will be added.
+     * @param ui The Ui object for displaying warnings about corrupted data.
+     * @return A List<Task> containing the tasks loaded from the file.
      * @throws IOException If an I/O error occurs while accessing the storage file.
      */
     public List<Task> loadTasks(Ui ui) throws IOException {
@@ -106,11 +118,12 @@ public class Storage {
         return tasks;
     }
 
-    /* 
-     * Saves all tasks to the storage file (overwrites).
+    /**
+     * Saves all tasks from the provided list to the storage file (overwrites).
+     * The data directory will be created if it does not exist.
      * 
      * @param tasks The list of tasks to save.
-     * @throws IOException If writing fails
+     * @throws IOException If writing fails (I/O error).
      */
     public void saveTasks(List<Task> tasks) throws IOException {
         Path parent = filePath.getParent();
@@ -126,11 +139,11 @@ public class Storage {
         }
     }
 
-     /*
-     * Serialise a task into a single-line storage representation.
+     /**
+     * Serialise a Task object into a single-line string representation for storage.
      * 
-     * @param task The task to serialise.
-     * @return Serialised string.
+     * @param task The Task object to serialise.
+     * @return Serialised string representing the task.
      */
     private String serialiseTask(Task task) {
         String doneFlag = task.isDone() ? "1" : "0";

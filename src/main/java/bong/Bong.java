@@ -95,7 +95,8 @@ public class Bong {
                         storage.saveTasks(tasks.getTasks());
                         break;
                     case EVENT:
-                        Task newEvent = new Event(parsedCommand.description, parsedCommand.eventStart, parsedCommand.eventEnd);
+                        Task newEvent = new Event(parsedCommand.description,
+                                parsedCommand.eventStart, parsedCommand.eventEnd);
                         tasks.addTask(newEvent);
                         ui.showAddedTask(newEvent, tasks.size());
                         storage.saveTasks(tasks.getTasks());

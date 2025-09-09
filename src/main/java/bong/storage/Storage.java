@@ -1,13 +1,17 @@
 package bong.storage;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
+
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +35,7 @@ public class Storage {
     }
 
     /*
-     * Loads tasks from the from the storage file into the provided task list.
+     * Loads tasks from the storage file into the provided task list.
      * If the data directory or file does not exist, it will be created.
      * Corrupted lines in the storage file will be skipped with a warning.
      * 
@@ -69,7 +73,7 @@ public class Storage {
                     case "T":
                         Task todo = new Todo(parts[2].trim());
                         if (done) {
-                            todo.mark();
+                            todo.setMark();
                         }
                         tasks.add(todo);
                         break;
@@ -80,7 +84,7 @@ public class Storage {
                         LocalDateTime deadline = LocalDateTime.parse(parts[3].trim(), STORAGE_DATE_TIME_FORMAT);
                         Deadline deadlineTask = new Deadline(parts[2].trim(), deadline.format(INPUT_DATE_TIME_FORMAT));
                         if (done) {
-                            deadlineTask.mark();
+                            deadlineTask.setMark();
                         }
                         tasks.add(deadlineTask);
                         break;
@@ -90,9 +94,10 @@ public class Storage {
                         }
                         LocalDateTime start = LocalDateTime.parse(parts[3].trim(), STORAGE_DATE_TIME_FORMAT);
                         LocalDateTime end = LocalDateTime.parse(parts[4].trim(), STORAGE_DATE_TIME_FORMAT);
-                        Event eventTask = new Event(parts[2].trim(), start.format(INPUT_DATE_TIME_FORMAT), end.format(INPUT_DATE_TIME_FORMAT));
+                        Event eventTask = new Event(
+                                parts[2].trim(), start.format(INPUT_DATE_TIME_FORMAT), end.format(INPUT_DATE_TIME_FORMAT));
                         if (done) {
-                            eventTask.mark();
+                            eventTask.setMark();
                         }
                         tasks.add(eventTask);
                         break;
@@ -138,7 +143,8 @@ public class Storage {
             return "T" + " | " + doneFlag + " | " + task.getDescription();
         } else if (task instanceof Deadline) {
             Deadline d = (Deadline) task;
-            return "D" + " | " + doneFlag + " | " + d.getDescription() + " | " + d.getDeadline().format(STORAGE_DATE_TIME_FORMAT);
+            return "D" + " | " + doneFlag + " | " + d.getDescription() + " | "
+                    + d.getDeadline().format(STORAGE_DATE_TIME_FORMAT);
         } else if (task instanceof Event) {
             Event e = (Event) task;
             return "E" + " | " + doneFlag + " | " + e.getDescription() + " | " + 

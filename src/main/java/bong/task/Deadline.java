@@ -22,7 +22,8 @@ public class Deadline extends Task {
         try {
             this.deadline = LocalDateTime.parse(deadline, INPUT_DATE_TIME_FORMAT);
         } catch (DateTimeParseException e) {
-            throw new BongException("   Invalid deadline date/time format!\n    Please use 'yyyy-MM-dd HHmm' (eg. 2019-10-15 1800).");
+            throw new BongException("   Invalid deadline date/time format!\n" +
+                    "    Please use 'yyyy-MM-dd HHmm' (eg. 2019-10-15 1800).");
         }
     }
 

@@ -40,7 +40,7 @@ public class TaskList {
         if (taskIndex <= 0 || taskIndex > tasks.size()) {
             throw new BongException("You do not have this many tasks in your list!");
         }
-        tasks.get(taskIndex - 1).mark();
+        tasks.get(taskIndex - 1).setMark();
         return tasks.get(taskIndex - 1);
     }
 
@@ -48,7 +48,7 @@ public class TaskList {
         if (taskIndex <= 0 || taskIndex > tasks.size()) {
             throw new BongException("You do not have this many tasks in your list!");
         }
-        tasks.get(taskIndex - 1).unmark();
+        tasks.get(taskIndex - 1).setUnmark();
         return tasks.get(taskIndex - 1);
     }
 

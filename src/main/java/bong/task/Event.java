@@ -6,6 +6,10 @@ import java.time.format.DateTimeParseException;
 
 import bong.exception.BongException;
 
+/**
+ * Represents a task that is an event, occurring within a specific start and end time.
+ * It extends the base Task class and includes a start and end time (LocalDateTime).
+ */
 public class Event extends Task {
     protected LocalDateTime start;
     protected LocalDateTime end;
@@ -18,6 +22,15 @@ public class Event extends Task {
     private static final DateTimeFormatter OUTPUT_DATE_TIME_FORMAT =  
         DateTimeFormatter.ofPattern("MMM dd yyyy, HH:mm");
 
+    /**
+     * Constructs an Event task with the given description, start time string, and end time string.
+     * The start and end time strings are parsed into LocalDateTime objects.
+     *
+     * @param description The description of the event task.
+     * @param start The event start date and time as a string in "yyyy-MM-dd HHmm" format.
+     * @param end The event end date and time as a string in "yyyy-MM-dd HHmm" format.
+     * @throws BongException If either the start or end date/time string is in an invalid format.
+     */
     public Event(String description, String start, String end) throws BongException {
         super(description);
         try {

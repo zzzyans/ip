@@ -3,10 +3,20 @@ package bong.parser;
 import bong.Bong;
 import bong.exception.BongException;
 
+/**
+ * Deals with making sense of the user command.
+ * The Parser class is responsible for interpreting raw user input strings
+ * into a structured command object that the Bong application can execute.
+ */
 public class Parser {
     private static final String DEADLINE_DELIM = " /by ";
     private static final String EVENT_DELIM_REGEX = " /from | /to ";
 
+    /**
+     * Encapsulates the result of parsing a user command.
+     * It contains the command type and its specific arguments (description,
+     * deadline time, event start/end times, or task number).
+     */
     public static class ParsedCommand {
         public Bong.Command command;
         public String description; // For Todo, Deadline, Event

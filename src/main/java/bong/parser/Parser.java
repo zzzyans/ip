@@ -24,8 +24,9 @@ public class Parser {
         public String eventStart; // For Event
         public String eventEnd; // For Event
         public int taskNumber; // For Mark, Unmark, Delete
+        public String keyword;
 
-        /*
+        /**
          * Constructor for commands without specific arguments.
          * 
          * @param command The type of command.
@@ -34,7 +35,7 @@ public class Parser {
             this.command = command;
         }
 
-        /*
+        /**
          * Constructor for Todo command.
          * 
          * @param command The type of command.
@@ -45,7 +46,7 @@ public class Parser {
             this.description = description;
         }
 
-        /*
+        /**
          * Constructor for Deadline command.
          * 
          * @param command The type of command.
@@ -58,7 +59,7 @@ public class Parser {
             this.deadline = deadline;
         }
 
-        /*
+        /**
          * Constructor for Event command.
          * 
          * @param command The type of command.
@@ -73,7 +74,7 @@ public class Parser {
             this.eventEnd = end;
         }
 
-        /*
+        /**
          * Constructor for commands requiring a task number.
          * 
          * @param command The type of command.
@@ -83,9 +84,20 @@ public class Parser {
             this.command = command;
             this.taskNumber = taskNumber;
         }
+
+        /*
+         * Constructor for Find command.
+         *
+         * @param command The type of command.
+         * @param keyword The keyword to search for.
+         */
+        public ParsedCommand(Bong.Command command, String keyword, boolean isFind) {
+            this.command = command;
+            this.keyword = keyword;
+        }
     }
 
-    /*
+    /**
     * Parses the full user command string and extracts the command type and its arguments.
     * 
     * @param fullCommand The complete user input string.
@@ -159,6 +171,11 @@ public class Parser {
                             " Try 'event <description> /from <yyyy-MM-dd HHmm> /to <yyyy-MM-dd HHmm>.'");
                 }
                 return new ParsedCommand(command, eventDescription, eventStartTime, eventEndTime);
+            case FIND:
+                if (arguments.isEmpty()) {
+                    throw new BongException("    The 'find' command needs a keyword to search for!");
+                }
+                return new ParsedCommand(command, arguments, true);
             default:
                 throw new BongException("   An unexpected command type was encountered during parsing.");
         }

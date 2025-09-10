@@ -1,6 +1,7 @@
 package bong;
 
 import java.io.IOException;
+import java.util.List;
 
 import bong.ui.Ui;
 import bong.storage.Storage;
@@ -28,7 +29,7 @@ public class Bong {
      * Command represents the supported user command types.
      */
     public static enum Command {
-        LIST, MARK, UNMARK, TODO, DEADLINE, EVENT, DELETE, UNKNOWN
+        LIST, MARK, UNMARK, TODO, DEADLINE, EVENT, DELETE, FIND, UNKNOWN
     }
 
     // Instance variables for the core components
@@ -112,6 +113,10 @@ public class Bong {
                         Task removedTask = tasks.deleteTask(parsedCommand.taskNumber);
                         ui.showRemovedTask(removedTask, tasks.size());
                         storage.saveTasks(tasks.getTasks());
+                        break;
+                    case FIND:
+                        List<Task> matchingTasks = tasks.findTasks(parsedCommand.keyword);
+                        ui.showMatchingTasks(matchingTasks);
                         break;
                     case UNKNOWN:
                         throw new BongException("Command UNKNOWN was return by Parser without an exception.");

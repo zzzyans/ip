@@ -68,6 +68,24 @@ public class Ui {
         showLine();
     }
 
+    /**
+     * Display a list of tasks that match a specific search keyword.
+     * If no tasks match, an appropriate message is displayed.
+     *
+     * @param matchingTasks A List<Task> containing tasks that matched the search criteria.
+     */
+    public void showMatchingTasks(List<Task> matchingTasks) {
+        if (matchingTasks.isEmpty()) {
+            System.out.println("    No matching tasks found in your list.");
+        } else {
+            System.out.println("    Here are the matching tasks found in your list:");
+            for (int i = 0; i < matchingTasks.size(); i++) {
+                System.out.println("    " + (i + 1) + ". " + matchingTasks.get(i).toString());
+            }
+        }
+        showLine();
+    }
+
     public void showError(String message) {
         System.out.println(message);
         showLine();

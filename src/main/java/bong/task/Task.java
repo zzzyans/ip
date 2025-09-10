@@ -38,11 +38,11 @@ public class Task {
         return this.isDone;
     }
 
-    public void mark() {
+    public void setMark() {
         this.isDone = true;
     }
 
-    public void unmark() {
+    public void setUnmark() {
         this.isDone = false;
     }
 

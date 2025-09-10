@@ -114,13 +114,15 @@ public class Parser {
             case UNMARK:
             case DELETE:
                 if (arguments.isEmpty()) {
-                    throw new BongException("   The task number cannot be empty for " + commandWord.toLowerCase() + " command.");
+                    throw new BongException("   The task number cannot be empty for "
+                            + commandWord.toLowerCase() + " command.");
                 }
                 try {
                     int taskNumber = Integer.parseInt(arguments);
                     return new ParsedCommand(command, taskNumber);
                 } catch (NumberFormatException e) {
-                    throw new BongException("    The task number provided is invalid. Please enter a valid number.");
+                    throw new BongException("    The task number provided is invalid." +
+                            " Please enter a valid number.");
                 }
 
             case TODO:
@@ -132,25 +134,29 @@ public class Parser {
             case DEADLINE:
                 String[] deadlineParts = arguments.split(DEADLINE_DELIM, 2);
                 if (deadlineParts.length < 2) {
-                    throw new BongException("Looks like your 'deadline' is missing details! Try 'deadline <description> /by <yyyy-MM-dd HHmm>.'");
+                    throw new BongException("Looks like your 'deadline' is missing details!" +
+                            " Try 'deadline <description> /by <yyyy-MM-dd HHmm>.'");
                 }
                 String deadlineDescription = deadlineParts[0].trim();
                 String deadlineTime = deadlineParts[1].trim();
                 if (deadlineDescription.isEmpty() || deadlineTime.isEmpty()) {
-                    throw new BongException("Looks like your 'deadline' is missing details! Try 'deadline <description> /by <yyyy-MM-dd HHmm>.'");
+                    throw new BongException("Looks like your 'deadline' is missing details!" +
+                            " Try 'deadline <description> /by <yyyy-MM-dd HHmm>.'");
                 }
                 return new ParsedCommand(command, deadlineDescription, deadlineTime);
             
             case EVENT:
                 String[] eventParts = arguments.split(EVENT_DELIM_REGEX, 3);
                 if (eventParts.length < 3) {
-                    throw new BongException("Looks like your 'event' is missing details! Try 'event <description> /from <yyyy-MM-dd HHmm> /to <yyyy-MM-dd HHmm>.'");
+                    throw new BongException("Looks like your 'event' is missing details!" +
+                            " Try 'event <description> /from <yyyy-MM-dd HHmm> /to <yyyy-MM-dd HHmm>.'");
                 }
                 String eventDescription = eventParts[0].trim();
                 String eventStartTime = eventParts[1].trim();
                 String eventEndTime = eventParts[2].trim();
                 if (eventDescription.isEmpty() || eventStartTime.isEmpty() || eventEndTime.isEmpty()) {
-                    throw new BongException("Looks like your 'event' is missing details! Try 'event <description> /from <yyyy-MM-dd HHmm> /to <yyyy-MM-dd HHmm>.'");
+                    throw new BongException("Looks like your 'event' is missing details!" +
+                            " Try 'event <description> /from <yyyy-MM-dd HHmm> /to <yyyy-MM-dd HHmm>.'");
                 }
                 return new ParsedCommand(command, eventDescription, eventStartTime, eventEndTime);
             default:

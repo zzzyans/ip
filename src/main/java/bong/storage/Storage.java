@@ -17,12 +17,6 @@ import bong.task.Event;
 import bong.task.Task;
 import bong.task.Todo;
 
-/**
- * Deals with loading tasks from the file and saving tasks in the file.
- * The Storage class handles all file I/O operations for the Bong application,
- * including creating the data directory and file if they do not exist,
- * parsing stored task data, and serialising tasks for persistence.
- */
 public class Storage {
     private final Path filePath;
 
@@ -32,11 +26,6 @@ public class Storage {
     private static final DateTimeFormatter INPUT_DATE_TIME_FORMAT =
         DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
 
-    /**
-     * Constructs a Storage object with the specified file path.
-     *
-     * @param filePath The string representation of the path to the storage file.
-     */
     public Storage(String filePath) {
         this.filePath = Paths.get(filePath);
     }
@@ -118,12 +107,11 @@ public class Storage {
         return tasks;
     }
 
-    /**
-     * Saves all tasks from the provided list to the storage file (overwrites).
-     * The data directory will be created if it does not exist.
+    /* 
+     * Saves all tasks to the storage file (overwrites).
      * 
      * @param tasks The list of tasks to save.
-     * @throws IOException If writing fails (I/O error).
+     * @throws IOException If writing fails
      */
     public void saveTasks(List<Task> tasks) throws IOException {
         Path parent = filePath.getParent();
@@ -139,11 +127,11 @@ public class Storage {
         }
     }
 
-     /**
-     * Serialise a Task object into a single-line string representation for storage.
+     /*
+     * Serialise a task into a single-line storage representation.
      * 
-     * @param task The Task object to serialise.
-     * @return Serialised string representing the task.
+     * @param task The task to serialise.
+     * @return Serialised string.
      */
     private String serialiseTask(Task task) {
         String doneFlag = task.isDone() ? "1" : "0";

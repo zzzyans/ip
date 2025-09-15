@@ -81,7 +81,7 @@ public class Storage {
                         LocalDateTime deadline = LocalDateTime.parse(parts[3].trim(), STORAGE_DATE_TIME_FORMAT);
                         Deadline deadlineTask = new Deadline(parts[2].trim(), deadline.format(INPUT_DATE_TIME_FORMAT));
                         if (done) {
-                            deadlineTask.setUnmark();
+                            deadlineTask.setMark();
                         }
                         tasks.add(deadlineTask);
                         break;

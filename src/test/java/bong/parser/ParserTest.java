@@ -27,7 +27,7 @@ public class ParserTest {
     @Test
     void parse_todoCommandEmptyDescription_throwsBongException() {
         Exception exception = assertThrows(BongException.class, () -> Parser.parse("todo "));
-        assertEquals("    A todo needs a description!", exception.getMessage());
+        assertEquals("A todo needs a description!", exception.getMessage());
     }
 
     @Test
@@ -93,13 +93,13 @@ public class ParserTest {
     @Test
     void parse_markCommandNonNumeric_throwsBongException() {
         Exception exception = assertThrows(BongException.class, () -> Parser.parse("mark abc"));
-        assertEquals("    The task number provided is invalid. Please enter a valid number.", exception.getMessage());
+        assertEquals("The task number provided is invalid. Please enter a valid number.", exception.getMessage());
     }
 
     @Test
     void parse_markCommandEmptyNumber_throwsBongException() {
         Exception exception = assertThrows(BongException.class, () -> Parser.parse("mark "));
-        assertEquals("   The task number cannot be empty for mark command.", exception.getMessage());
+        assertEquals("The task number cannot be empty for mark command.", exception.getMessage());
     }
 
     @Test

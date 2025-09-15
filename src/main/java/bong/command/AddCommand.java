@@ -43,8 +43,8 @@ public abstract class AddCommand extends Command {
         } catch (IOException e) {
             throw new BongException("Error saving tasks: " + e.getMessage());
         }
-        return "    Got it. I've added this task:\n" +
-                "    " + newTask.toString() + "\n" +
-                "    Now you have " + tasks.size() + " tasks in the list.";
+        return "Got it. I've added this task:\n" +
+                newTask.toString() + "\n" +
+                "Now you have " + tasks.size() + " tasks in the list.";
     }
 }

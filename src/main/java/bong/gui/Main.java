@@ -1,6 +1,6 @@
 package bong.gui;
 
-import bong.Bong;
+import bong.BongCore;
 import java.io.IOException;
 
 import javafx.application.Application;
@@ -10,11 +10,13 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 /**
- * A GUI for Duke using FXML.
+ * The main class for the JavaFX GUI of the Bong application.
+ * This class sets up the primary stage and scene, and handles user interactions
+ * with the chat interface, delegating logic to BongCore.
  */
 public class Main extends Application {
 
-    private Bong bong = new Bong("../../data/bong.txt");
+    private BongCore bongCore = new BongCore();
 
     @Override
     public void start(Stage stage) {
@@ -23,9 +25,10 @@ public class Main extends Application {
             AnchorPane ap = fxmlLoader.load();
             Scene scene = new Scene(ap);
             stage.setScene(scene);
+            stage.setTitle("Bong");
             stage.setMinHeight(220);
             stage.setMinWidth(417);
-            fxmlLoader.<MainWindow>getController().setDuke(bong);  // inject the Duke instance
+            fxmlLoader.<MainWindow>getController().setBongCore(bongCore);  // inject the Duke instance
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();

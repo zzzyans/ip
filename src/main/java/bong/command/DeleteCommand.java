@@ -43,8 +43,8 @@ public class DeleteCommand extends Command {
         } catch (IOException e) {
             throw new BongException("Error saving tasks: " + e. getMessage());
         }
-        return "    Noted. I've removed this task:\n" + "    " +
-                removedTask.toString() + "\n    Now you have " +
+        return "Noted. I've removed this task:\n" +
+                removedTask.toString() + "\nNow you have " +
                 tasks.size() + " tasks in the list.";
     }
 }

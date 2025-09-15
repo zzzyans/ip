@@ -37,13 +37,12 @@ public class UnmarkCommand extends Command {
      */
     @Override
     public String execute(TaskList tasks, Ui ui, Storage storage) throws BongException {
-        Task unmarkedTask = tasks.markTask(taskNumber);
+        Task unmarkedTask = tasks.unmarkTask(taskNumber);
         try {
             storage.saveTasks(tasks.getTasks());
         } catch (IOException e) {
             throw new BongException("Error saving tasks: " + e. getMessage());
         }
-        return "    Nice! I've marked this task as not done yet:\n" +
-                "    " + unmarkedTask.toString();
+        return "Nice! I've marked this task as not done yet:\n" + unmarkedTask.toString();
     }
 }

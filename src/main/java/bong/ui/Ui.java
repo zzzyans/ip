@@ -1,9 +1,6 @@
 package bong.ui;
 
-import java.util.List;
 import java.util.Scanner;
-
-import bong.task.Task;
 
 /**
  * Deals with interaction with the user.
@@ -33,7 +30,7 @@ public class Ui {
      * Displays the welcome message when the Bong application starts.
      */
     public void showWelcome() {
-        System.out.println("    Hello! I'm Bong!\n    What can I do for you?");
+        System.out.println("Hello! I'm Bong!\nWhat can I do for you?");
         showLine();
     }
 
@@ -52,7 +49,7 @@ public class Ui {
      * @param message The specific error message about the loading failure.
      */
     public void showLoadingError(String message) {
-        System.out.println("    Failed to load tasks: " + message);
+        System.out.println("Failed to load tasks: " + message);
         showLine();
     }
 
@@ -82,7 +79,7 @@ public class Ui {
      * @param line The corrupted line from the storage file.
      */
     public void showStorageCorruptionWarning(String line) {
-        System.out.println("    Warning: Skipping corrupted line in storage: " + line);
+        System.out.println("Warning: Skipping corrupted line in storage: " + line);
         showLine();
     }
 

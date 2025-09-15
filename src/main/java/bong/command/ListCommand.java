@@ -28,11 +28,11 @@ public class ListCommand extends Command {
         StringBuilder response = new StringBuilder();
 
         if (currentTasks.isEmpty()) {
-            response.append("    Your task list is empty. Time to add some tasks!");
+            response.append("Your task list is empty. Time to add some tasks!");
         } else {
-            response.append("    Here are the tasks in your list:\n");
+            response.append("Here are the tasks in your list:\n");
             for (int i = 0; i < currentTasks.size(); i++) {
-                response.append("    ").append(i + 1).append(". ").append(currentTasks.get(i).toString()).append("\n");
+                response.append(i + 1).append(". ").append(currentTasks.get(i).toString()).append("\n");
             }
         }
         return response.toString();

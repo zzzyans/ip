@@ -18,6 +18,13 @@ public class BongCore {
     // File path where tasks are persistently stored
     private static final String FILE_PATH = "data/bong.txt";
 
+    /**
+     * Represents the supported user command types in the Bong application.
+     */
+    public static enum CommandType {
+        LIST, MARK, UNMARK, TODO, DEADLINE, EVENT, DELETE, FIND, BYE, UNKNOWN
+    }
+
     // Instance variables for the core components
     private Ui ui;
     private Storage storage;

@@ -43,7 +43,6 @@ public class MarkCommand extends Command {
         } catch (IOException e) {
             throw new BongException("Error saving tasks: " + e. getMessage());
         }
-        return "    Nice! I've marked this task as done:\n" +
-                "    " + markedTask.toString();
+        return "Nice! I've marked this task as done:\n" + markedTask.toString();
     }
 }

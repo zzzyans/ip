@@ -39,11 +39,11 @@ public class FindCommand extends Command {
         StringBuilder response = new StringBuilder();
 
         if (matchingTasks.isEmpty()) {
-            response.append("    No matching tasks found in your list.");
+            response.append("No matching tasks found in your list.");
         } else {
-            response.append("    Here are the matching tasks in your list:\n");
+            response.append("Here are the matching tasks in your list:\n");
             for (int i = 0; i < matchingTasks.size(); i++) {
-                response.append("    ").append(i + 1).append(". ").append(matchingTasks.get(i).toString()).append("\n");
+                response.append(i + 1).append(". ").append(matchingTasks.get(i).toString()).append("\n");
             }
         }
         return response.toString();

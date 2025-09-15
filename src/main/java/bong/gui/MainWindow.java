@@ -1,7 +1,12 @@
 package bong.gui;
 
-import bong.Bong;
 
+import bong.BongCore;
+
+import bong.command.Command;
+import bong.exception.BongException;
+import bong.parser.Parser;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
@@ -23,7 +28,7 @@ public class MainWindow extends AnchorPane {
     @FXML
     private Button sendButton;
 
-    private Bong bong;
+    private BongCore bongCore;
 
     private Image userImage = new Image(this.getClass().getResourceAsStream("/images/UserCat.png"));
     private Image bongImage = new Image(this.getClass().getResourceAsStream("/images/BongCat.png"));
@@ -31,11 +36,22 @@ public class MainWindow extends AnchorPane {
     @FXML
     public void initialize() {
         scrollPane.vvalueProperty().bind(dialogContainer.heightProperty());
+
+        sendButton.setOnAction(event -> handleUserInput());
+        userInput.setOnAction(event -> handleUserInput());
     }
 
-    /** Injects the Duke instance */
-    public void setDuke(Bong b) {
-        bong = b;
+    /**
+     * Injects the BongCore instance into this controller.
+     * This method is called by Main after loading the FXML.
+     *
+     * @param b BongCore instance containing the application's logic.
+     */
+    public void setBongCore(BongCore b) {
+        bongCore = b;
+
+        String welcomeMessage = bongCore.getResponse("list");
+        dialogContainer.getChildren().add(DialogBox.getBongDialog(welcomeMessage, bongImage));
     }
 
     /**
@@ -45,12 +61,30 @@ public class MainWindow extends AnchorPane {
     @FXML
     private void handleUserInput() {
         String input = userInput.getText();
-        String response = bong.getResponse(input);
+        if (input.isEmpty()) {
+            return;
+        }
+
         dialogContainer.getChildren().addAll(
-                DialogBox.getUserDialog(input, userImage),
-                DialogBox.getDukeDialog(response, bongImage)
+                DialogBox.getUserDialog(input, userImage)
         );
+
+        String response = bongCore.getResponse(input);
+
+        dialogContainer.getChildren().addAll(
+                DialogBox.getBongDialog(response, bongImage)
+        );
+
         userInput.clear();
+
+        try {
+            Command parsedCommand = Parser.parse(input);
+            if (parsedCommand.isExit()) {
+                Platform.exit();
+            }
+        } catch (BongException ignored) {
+
+        }
     }
 }
 

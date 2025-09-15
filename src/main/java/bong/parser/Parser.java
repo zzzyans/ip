@@ -1,6 +1,6 @@
 package bong.parser;
 
-import bong.Bong.CommandType;
+import bong.BongCore.CommandType;
 
 import bong.command.Command;
 import bong.command.DeleteCommand;
@@ -40,8 +40,8 @@ public class Parser {
         try {
             commandEnum = CommandType.valueOf(commandWord);
         } catch (IllegalArgumentException e) {
-            throw new BongException("    Hmm, I don't understand that command.\n"
-                + "    Please try 'todo', 'deadline', 'event', 'list', 'mark', 'unmark', 'delete', 'find', or 'bye'.");
+            throw new BongException("Hmm, I don't understand that command.\n"
+                + "Please try 'todo', 'deadline', 'event', 'list', 'mark', 'unmark', 'delete', 'find', or 'bye'.");
         }
 
         return switch (commandEnum) {
@@ -51,7 +51,8 @@ public class Parser {
             case TODO -> parseTodoCommand(arguments);
             case DEADLINE -> parseDeadlineCommand(arguments);
             case EVENT -> parseEventCommand(arguments);
-            default -> throw new BongException("   An unexpected command type was encountered during parsing.");
+            case FIND -> parseFindCommand(arguments);
+            default -> throw new BongException("An unexpected command type was encountered during parsing.");
         };
     }
 
@@ -67,7 +68,7 @@ public class Parser {
     private static Command parseNumberedCommand(
             CommandType command, String arguments, String commandWord) throws BongException {
         if (arguments.isEmpty()) {
-            throw new BongException("    The task number cannot be empty for " + commandWord.toLowerCase() + " command.");
+            throw new BongException("The task number cannot be empty for " + commandWord.toLowerCase() + " command.");
         }
         try {
             int taskNumber = Integer.parseInt(arguments);
@@ -78,7 +79,7 @@ public class Parser {
                 default -> throw new BongException("Invalid command type for parseNumberedCommand.");
             };
         } catch (NumberFormatException e) {
-            throw new BongException("    The task number provided is invalid. Please enter a valid number.");
+            throw new BongException("The task number provided is invalid. Please enter a valid number.");
         }
     }
 
@@ -91,7 +92,7 @@ public class Parser {
      */
     private static Command parseTodoCommand(String arguments) throws BongException {
         if (arguments.isEmpty()) {
-            throw new BongException("    A todo needs a description!");
+            throw new BongException("A todo needs a description!");
         }
         return new TodoCommand(arguments);
     }
@@ -150,7 +151,7 @@ public class Parser {
      */
     private static Command parseFindCommand(String arguments) throws BongException {
         if (arguments.isEmpty()) {
-            throw new BongException("    The 'find' command needs a keyword to search for!");
+            throw new BongException("The 'find' command needs a keyword to search for!");
         }
         return new FindCommand(arguments);
     }

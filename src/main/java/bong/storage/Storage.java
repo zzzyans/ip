@@ -70,7 +70,7 @@ public class Storage {
                     case "T":
                         Task todo = new Todo(parts[2].trim());
                         if (done) {
-                            todo.mark();
+                            todo.setMark();
                         }
                         tasks.add(todo);
                         break;
@@ -81,7 +81,7 @@ public class Storage {
                         LocalDateTime deadline = LocalDateTime.parse(parts[3].trim(), STORAGE_DATE_TIME_FORMAT);
                         Deadline deadlineTask = new Deadline(parts[2].trim(), deadline.format(INPUT_DATE_TIME_FORMAT));
                         if (done) {
-                            deadlineTask.mark();
+                            deadlineTask.setUnmark();
                         }
                         tasks.add(deadlineTask);
                         break;
@@ -93,7 +93,7 @@ public class Storage {
                         LocalDateTime end = LocalDateTime.parse(parts[4].trim(), STORAGE_DATE_TIME_FORMAT);
                         Event eventTask = new Event(parts[2].trim(), start.format(INPUT_DATE_TIME_FORMAT), end.format(INPUT_DATE_TIME_FORMAT));
                         if (done) {
-                            eventTask.mark();
+                            eventTask.setMark();
                         }
                         tasks.add(eventTask);
                         break;

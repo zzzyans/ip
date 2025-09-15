@@ -28,8 +28,8 @@ public class Bong {
     /**
      * Command represents the supported user command types.
      */
-    public static enum Command {
-        LIST, MARK, UNMARK, TODO, DEADLINE, EVENT, DELETE, FIND, UNKNOWN
+    public static enum CommandType {
+        LIST, BYE, MARK, UNMARK, TODO, DEADLINE, EVENT, DELETE, FIND, UNKNOWN
     }
 
     // Instance variables for the core components

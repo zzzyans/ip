@@ -1,9 +1,6 @@
 package bong.ui;
 
-import java.util.List;
 import java.util.Scanner;
-
-import bong.task.Task;
 
 /**
  * Deals with interaction with the user.
@@ -33,7 +30,7 @@ public class Ui {
      * Displays the welcome message when the Bong application starts.
      */
     public void showWelcome() {
-        System.out.println("    Hello! I'm Bong!\n    What can I do for you?");
+        System.out.println("Hello! I'm Bong!\nWhat can I do for you?");
         showLine();
     }
 
@@ -52,96 +49,19 @@ public class Ui {
      * @param message The specific error message about the loading failure.
      */
     public void showLoadingError(String message) {
-        System.out.println("    Failed to load tasks: " + message);
+        System.out.println("Failed to load tasks: " + message);
         showLine();
     }
 
     /**
-     * Displays the exit message when the user quits the application.
-     */
-    public void showExitMessage() {
-        System.out.println("    Bye. Hope to see you again soon!");
-    }
-
-    /**
-     * Displays a confirmation message after a new task has been added.
+     * Displays a general response message to the user, typically the result of a command execution.
      *
-     * @param task The Task that was added.
-     * @param totalTasks The total number of tasks currently in the list.
+     * @param message The message to be shown.
      */
-    public void showAddedTask(Task task, int totalTasks) {
-        System.out.println("    Got it. I've added this task:");
-        System.out.println("        " + task.toString());
-        System.out.println("    " + "Now you have " + totalTasks + " tasks in the list.");
+    public void showResponse(String message) {
+        System.out.println(message);
         showLine();
     }
-
-    /**
-     * Displays a confirmation message after a task has been marked as done.
-     *
-     * @param task The Task that was marked.
-     */
-    public void showMarkedTask(Task task) {
-        System.out.println("    Nice! I've marked this task as done:");
-        System.out.println("        " + task.toString());
-        showLine();
-    }
-
-    /**
-     * Displays a confirmation message after a task has been marked as not done.
-     *
-     * @param task The Task that was unmarked.
-     */
-    public void showUnmarkedTask(Task task) {
-        System.out.println("    OK, I've marked this task as not done yet:");
-        System.out.println("        " + task.toString());
-        showLine();
-    }
-
-    /**
-     * Displays a confirmation message after a task has been removed from the list.
-     *
-     * @param task The Task that was removed.
-     * @param totalTasks The total number of tasks remaining in the list.
-     */
-    public void showRemovedTask(Task task, int totalTasks) {
-        System.out.println("    Noted. I've removed this task:");
-        System.out.println("        " + task.toString());
-        showLine();
-    }
-
-    /**
-     * Displays the entire list of tasks to the user.
-     * Each task is numbered starting from 1.
-     *
-     * @param tasks The List<Task> to be displayed.
-     */
-    public void showTaskList(List<Task> tasks) {
-        System.out.println("    Here are the tasks in your list:");
-        for (int i = 0; i < tasks.size(); i++) {
-            System.out.println("    " + (i + 1) + ". " + tasks.get(i).toString());
-        }
-        showLine();
-    }
-
-    /**
-     * Display a list of tasks that match a specific search keyword.
-     * If no tasks match, an appropriate message is displayed.
-     *
-     * @param matchingTasks A List<Task> containing tasks that matched the search criteria.
-     */
-    public void showMatchingTasks(List<Task> matchingTasks) {
-        if (matchingTasks.isEmpty()) {
-            System.out.println("    No matching tasks found in your list.");
-        } else {
-            System.out.println("    Here are the matching tasks found in your list:");
-            for (int i = 0; i < matchingTasks.size(); i++) {
-                System.out.println("    " + (i + 1) + ". " + matchingTasks.get(i).toString());
-            }
-        }
-        showLine();
-    }
-
 
     /**
      * Displays an error message to the user.
@@ -159,7 +79,7 @@ public class Ui {
      * @param line The corrupted line from the storage file.
      */
     public void showStorageCorruptionWarning(String line) {
-        System.out.println("    Warning: Skipping corrupted line in storage: " + line);
+        System.out.println("Warning: Skipping corrupted line in storage: " + line);
         showLine();
     }
 

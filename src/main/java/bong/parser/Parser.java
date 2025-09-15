@@ -1,6 +1,17 @@
 package bong.parser;
 
-import bong.Bong;
+import bong.BongCore.CommandType;
+
+import bong.command.Command;
+import bong.command.DeleteCommand;
+import bong.command.DeadlineCommand;
+import bong.command.EventCommand;
+import bong.command.ExitCommand;
+import bong.command.FindCommand;
+import bong.command.ListCommand;
+import bong.command.MarkCommand;
+import bong.command.TodoCommand;
+import bong.command.UnmarkCommand;
 import bong.exception.BongException;
 
 /**
@@ -13,171 +24,135 @@ public class Parser {
     private static final String EVENT_DELIM_REGEX = " /from | /to ";
 
     /**
-     * Encapsulates the result of parsing a user command.
-     * It contains the command type and its specific arguments (description,
-     * deadline time, event start/end times, or task number).
-     */
-    public static class ParsedCommand {
-        public Bong.Command command;
-        public String description; // For Todo, Deadline, Event
-        public String deadline; // for Deadline
-        public String eventStart; // For Event
-        public String eventEnd; // For Event
-        public int taskNumber; // For Mark, Unmark, Delete
-        public String keyword;
-
-        /**
-         * Constructor for commands without specific arguments.
-         * 
-         * @param command The type of command.
-         */
-        public ParsedCommand(Bong.Command command) {
-            this.command = command;
-        }
-
-        /**
-         * Constructor for Todo command.
-         * 
-         * @param command The type of command.
-         * @param description The description for the task.
-         */
-        public ParsedCommand(Bong.Command command, String description) {
-            this.command = command;
-            this.description = description;
-        }
-
-        /**
-         * Constructor for Deadline command.
-         * 
-         * @param command The type of command.
-         * @param description The description for the task.
-         * @param deadline The deadline time string.
-         */
-        public ParsedCommand(Bong.Command command, String description, String deadline) {
-            this.command = command;
-            this.description = description;
-            this.deadline = deadline;
-        }
-
-        /**
-         * Constructor for Event command.
-         * 
-         * @param command The type of command.
-         * @param description The description for the task.
-         * @param start The start time string.
-         * @param end The end time string.
-         */
-        public ParsedCommand(Bong.Command command, String description, String start, String end) {
-            this.command = command;
-            this.description = description;
-            this.eventStart = start;
-            this.eventEnd = end;
-        }
-
-        /**
-         * Constructor for commands requiring a task number.
-         * 
-         * @param command The type of command.
-         * @param taskNumber The 1-based index of the task.
-         */
-        public ParsedCommand(Bong.Command command, int taskNumber) {
-            this.command = command;
-            this.taskNumber = taskNumber;
-        }
-
-        /*
-         * Constructor for Find command.
-         *
-         * @param command The type of command.
-         * @param keyword The keyword to search for.
-         */
-        public ParsedCommand(Bong.Command command, String keyword, boolean isFind) {
-            this.command = command;
-            this.keyword = keyword;
-        }
-    }
-
-    /**
-    * Parses the full user command string and extracts the command type and its arguments.
+    * Parses the full user command string and returns a corresponding Command object.
     * 
     * @param fullCommand The complete user input string.
-    * @return A ParsedCommand object containing the command type and its extracted arguments.
-    * @throws BongException If the command is not understood or its format is invalid/incomplete.
+    * @return A Command object ready for execution.
+    * @throws BongException If the command is not recognised or its format is invalid/incomplete.
     */
-    public static ParsedCommand parse(String fullCommand) throws BongException {
+    public static Command parse(String fullCommand) throws BongException {
         String[] inputParts = fullCommand.trim().split(" ", 2);
         String commandWord = inputParts[0].toUpperCase();
         String arguments = inputParts.length > 1 ? inputParts[1].trim() : "";
 
-        Bong.Command command;
+        CommandType commandEnum;
 
         try {
-            command = Bong.Command.valueOf(commandWord);
+            commandEnum = CommandType.valueOf(commandWord);
         } catch (IllegalArgumentException e) {
-            throw new BongException("    Hmm, I don't understand that command.\n"
-                + "    Please try 'todo', 'deadline', 'event', 'list', 'mark', 'unmark', 'delete' or 'bye'.");
+            throw new BongException("Hmm, I don't understand that command.\n"
+                + "Please try 'todo', 'deadline', 'event', 'list', 'mark', 'unmark', 'delete', 'find', or 'bye'.");
         }
 
-        switch (command) {
-            case LIST:
-                return new ParsedCommand(command);
-            
-            case MARK:
-            case UNMARK:
-            case DELETE:
-                if (arguments.isEmpty()) {
-                    throw new BongException("   The task number cannot be empty for "
-                            + commandWord.toLowerCase() + " command.");
-                }
-                try {
-                    int taskNumber = Integer.parseInt(arguments);
-                    return new ParsedCommand(command, taskNumber);
-                } catch (NumberFormatException e) {
-                    throw new BongException("    The task number provided is invalid." +
-                            " Please enter a valid number.");
-                }
+        return switch (commandEnum) {
+            case LIST -> new ListCommand();
+            case BYE -> new ExitCommand();
+            case MARK, UNMARK, DELETE -> parseNumberedCommand(commandEnum, arguments, commandWord);
+            case TODO -> parseTodoCommand(arguments);
+            case DEADLINE -> parseDeadlineCommand(arguments);
+            case EVENT -> parseEventCommand(arguments);
+            case FIND -> parseFindCommand(arguments);
+            default -> throw new BongException("An unexpected command type was encountered during parsing.");
+        };
+    }
 
-            case TODO:
-                if (arguments.isEmpty()) {
-                    throw new BongException("    A todo needs a description!");
-                }
-                return new ParsedCommand(command, arguments);
-            
-            case DEADLINE:
-                String[] deadlineParts = arguments.split(DEADLINE_DELIM, 2);
-                if (deadlineParts.length < 2) {
-                    throw new BongException("Looks like your 'deadline' is missing details!" +
-                            " Try 'deadline <description> /by <yyyy-MM-dd HHmm>.'");
-                }
-                String deadlineDescription = deadlineParts[0].trim();
-                String deadlineTime = deadlineParts[1].trim();
-                if (deadlineDescription.isEmpty() || deadlineTime.isEmpty()) {
-                    throw new BongException("Looks like your 'deadline' is missing details!" +
-                            " Try 'deadline <description> /by <yyyy-MM-dd HHmm>.'");
-                }
-                return new ParsedCommand(command, deadlineDescription, deadlineTime);
-            
-            case EVENT:
-                String[] eventParts = arguments.split(EVENT_DELIM_REGEX, 3);
-                if (eventParts.length < 3) {
-                    throw new BongException("Looks like your 'event' is missing details!" +
-                            " Try 'event <description> /from <yyyy-MM-dd HHmm> /to <yyyy-MM-dd HHmm>.'");
-                }
-                String eventDescription = eventParts[0].trim();
-                String eventStartTime = eventParts[1].trim();
-                String eventEndTime = eventParts[2].trim();
-                if (eventDescription.isEmpty() || eventStartTime.isEmpty() || eventEndTime.isEmpty()) {
-                    throw new BongException("Looks like your 'event' is missing details!" +
-                            " Try 'event <description> /from <yyyy-MM-dd HHmm> /to <yyyy-MM-dd HHmm>.'");
-                }
-                return new ParsedCommand(command, eventDescription, eventStartTime, eventEndTime);
-            case FIND:
-                if (arguments.isEmpty()) {
-                    throw new BongException("    The 'find' command needs a keyword to search for!");
-                }
-                return new ParsedCommand(command, arguments, true);
-            default:
-                throw new BongException("   An unexpected command type was encountered during parsing.");
+    /**
+     * Parses commands that require a task number (MARK, UNMARK, DELETE).
+     *
+     * @param command The type of command (MARK, UNMARK, DELETE).
+     * @param arguments The arguments string containing the task number.
+     * @param commandWord The original command word (e.g., "mark", "unmark", "delete").
+     * @return A Command object for marking, unmarking, or deleting a task.
+     * @throws BongException If the task number is empty or not a valid integer.
+     */
+    private static Command parseNumberedCommand(
+            CommandType command, String arguments, String commandWord) throws BongException {
+        if (arguments.isEmpty()) {
+            throw new BongException("The task number cannot be empty for " + commandWord.toLowerCase() + " command.");
         }
+        try {
+            int taskNumber = Integer.parseInt(arguments);
+            return switch (command) {
+                case MARK -> new MarkCommand(taskNumber);
+                case UNMARK -> new UnmarkCommand(taskNumber);
+                case DELETE -> new DeleteCommand(taskNumber);
+                default -> throw new BongException("Invalid command type for parseNumberedCommand.");
+            };
+        } catch (NumberFormatException e) {
+            throw new BongException("The task number provided is invalid. Please enter a valid number.");
+        }
+    }
+
+    /**
+     * Parses a 'todo' command.
+     *
+     * @param arguments The arguments string containing the todo description.
+     * @return A Command object for adding a todo task.
+     * @throws BongException If the description is empty.
+     */
+    private static Command parseTodoCommand(String arguments) throws BongException {
+        if (arguments.isEmpty()) {
+            throw new BongException("A todo needs a description!");
+        }
+        return new TodoCommand(arguments);
+    }
+
+    /**
+     * Parses a 'deadline' command.
+     *
+     * @param arguments The arguments string containing the description and deadline time.
+     * @return A Command object for adding a deadline task.
+     * @throws BongException If the deadline command is missing details.
+     */
+    private static Command parseDeadlineCommand(String arguments) throws BongException {
+        String[] deadlineParts = arguments.split(DEADLINE_DELIM, 2);
+        if (deadlineParts.length < 2) {
+            throw new BongException("Looks like your 'deadline' is missing details!" +
+                    " Try 'deadline <description> /by <yyyy-MM-dd HHmm>.'");
+        }
+        String deadlineDescription = deadlineParts[0].trim();
+        String deadlineTime = deadlineParts[1].trim();
+        if (deadlineDescription.isEmpty() || deadlineTime.isEmpty()) {
+            throw new BongException("Looks like your 'deadline' is missing details!" +
+                    " Try 'deadline <description> /by <yyyy-MM-dd HHmm>.'");
+        }
+        return new DeadlineCommand(deadlineDescription, deadlineTime);
+    }
+
+    /**
+     * Parses an 'event' command.
+     *
+     * @param arguments The arguments string containing the description, start time, and end time.
+     * @return A Command object for adding an event task.
+     * @throws BongException If the event command is missing details.
+     */
+    private static Command parseEventCommand(String arguments) throws BongException {
+        String[] eventParts = arguments.split(EVENT_DELIM_REGEX, 3);
+        if (eventParts.length < 3) {
+            throw new BongException("Looks like your 'event' is missing details!" +
+                    " Try 'event <description> /from <yyyy-MM-dd HHmm> /to <yyyy-MM-dd HHmm>.'");
+        }
+        String eventDescription = eventParts[0].trim();
+        String eventStartTime = eventParts[1].trim();
+        String eventEndTime = eventParts[2].trim();
+        if (eventDescription.isEmpty() || eventStartTime.isEmpty() || eventEndTime.isEmpty()) {
+            throw new BongException("Looks like your 'event' is missing details!" +
+                    " Try 'event <description> /from <yyyy-MM-dd HHmm> /to <yyyy-MM-dd HHmm>.'");
+        }
+        return new EventCommand(eventDescription, eventStartTime, eventEndTime);
+    }
+
+    /**
+     * Parses a 'find' command.
+     *
+     * @param arguments The arguments string containing the keyword to search for.
+     * @return A Command object for finding tasks.
+     * @throws BongException If the keyword is empty.
+     */
+    private static Command parseFindCommand(String arguments) throws BongException {
+        if (arguments.isEmpty()) {
+            throw new BongException("The 'find' command needs a keyword to search for!");
+        }
+        return new FindCommand(arguments);
     }
 }

@@ -48,8 +48,9 @@ public class MainWindow extends AnchorPane {
      * @param b BongCore instance containing the application's logic.
      */
     public void setBongCore(BongCore b) {
+        assert b != null : "BongCore must not be null when injected into controller";
         bongCore = b;
-
+      
         String welcomeMessage = bongCore.getWelcomeMessage();
         dialogContainer.getChildren().add(DialogBox.getBongDialog(welcomeMessage, bongImage));
     }

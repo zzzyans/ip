@@ -70,6 +70,8 @@ public class DialogBox extends HBox {
      * @return A DialogBox instance configured for a user message.
      */
     public static DialogBox getUserDialog(String text, Image img) {
+        assert text != null : "dialog text must not be null";
+        assert img != null : "image must not be null";
         DialogBox db = new DialogBox(text, img);
         db.setAlignment(Pos.TOP_RIGHT);
         db.getStyleClass().remove("reply-label");
@@ -77,6 +79,8 @@ public class DialogBox extends HBox {
     }
 
     public static DialogBox getBongDialog(String text, Image img) {
+        assert text != null : "dialog text must not be null";
+        assert img != null : "image must not be null";
         DialogBox db = new DialogBox(text, img);
         db.flip();
         return db;

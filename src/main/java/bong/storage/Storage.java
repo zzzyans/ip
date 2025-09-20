@@ -29,6 +29,7 @@ public class Storage {
     private final Path filePath;
 
     public Storage(String filePath) {
+        assert filePath != null : "filePath must not be null";
         this.filePath = Paths.get(filePath);
     }
 
@@ -42,6 +43,7 @@ public class Storage {
      * @throws IOException If an I/O error occurs while accessing the storage file.
      */
     public List<Task> loadTasks(Ui ui) throws IOException {
+        assert ui != null : "Ui must not be null when loading tasks";
         List<Task> tasks = new ArrayList<>();
         Path parent = filePath.getParent();
         if (parent != null && Files.notExists(parent)) {
@@ -129,6 +131,7 @@ public class Storage {
      * @throws IOException If writing fails
      */
     public void saveTasks(List<Task> tasks) throws IOException {
+        assert tasks != null : "saveTasks requires a non-null list";
         Path parent = filePath.getParent();
         if (parent != null && Files.notExists(parent)) {
             Files.createDirectories(parent);

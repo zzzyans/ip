@@ -43,6 +43,7 @@ public class BongCore {
             ui.showLoadingError("Failed to load tasks: " + e.getMessage());
             tasks = new TaskList();
         }
+        assert ui != null && storage != null && tasks != null : "core components must be initialised";
     }
 
     /**
@@ -53,6 +54,8 @@ public class BongCore {
      * @return String containing the response from the executed command, or an error message.
      */
     public String getResponse(String input) {
+        assert input != null : "input must not be null";
+        assert ui != null && storage != null && tasks != null : "components must be initialised before getResponse";
         try {
             Command c = Parser.parse(input);
             return c.execute(tasks, ui, storage);

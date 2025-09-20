@@ -13,6 +13,7 @@ public class TaskList {
      */
     public TaskList() {
         this.tasks = new ArrayList<>();
+        assert this.tasks != null : "tasks list must be initialised";
     }
 
     /*
@@ -22,41 +23,55 @@ public class TaskList {
      * @param tasks The initial list of tasks.
      */
     public TaskList(List<Task> tasks) {
+        assert this.tasks != null : "initial tasks argument must not be null";
         this.tasks = tasks;
     }
 
     public void addTask(Task task) {
+        assert task != null : "task passed to addTask must not be null";
         this.tasks.add(task);
     }
 
     public Task deleteTask(int taskIndex) throws BongException {
+        assert tasks != null : "tasks list must be non-null";
         if (taskIndex <= 0 || taskIndex > tasks.size()) {
             throw new BongException("You do not have this many tasks in your list!");
         }
-        return tasks.remove(taskIndex - 1);
+        Task removed = tasks.remove(taskIndex - 1);
+        assert removed != null : "removed task should not be null after remove";
+        return removed;
     }
 
     public Task markTask(int taskIndex) throws BongException {
+        assert tasks != null : "tasks list must be non-null";
         if (taskIndex <= 0 || taskIndex > tasks.size()) {
             throw new BongException("You do not have this many tasks in your list!");
         }
         tasks.get(taskIndex - 1).setMark();
-        return tasks.get(taskIndex - 1);
+        Task t = tasks.get(taskIndex - 1);
+        assert t != null : "task at index must exist after mark";
+        return t;
     }
 
     public Task unmarkTask(int taskIndex) throws BongException {
+        assert tasks != null : "tasks list must be non-null";
         if (taskIndex <= 0 || taskIndex > tasks.size()) {
             throw new BongException("You do not have this many tasks in your list!");
         }
         tasks.get(taskIndex - 1).setUnmark();
-        return tasks.get(taskIndex - 1);
+        Task t = tasks.get(taskIndex - 1);
+        assert t != null : "task at index must exist after unmark";
+        return t;
     }
 
     public Task getTask(int taskIndex) throws BongException {
+        assert tasks != null : "tasks list must be non-null";
         if (taskIndex <= 0 || taskIndex > tasks.size()) {
             throw new BongException("You do not have this many tasks in your list!");
         }
-        return tasks.get(taskIndex - 1);
+        Task t = tasks.get(taskIndex - 1);
+        assert t != null : "task at index must not be null";
+        return t;
     }
 
 

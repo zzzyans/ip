@@ -7,24 +7,26 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import bong.exception.BongException;
 import bong.ui.Ui;
 import bong.task.Deadline;
 import bong.task.Event;
 import bong.task.Task;
 import bong.task.Todo;
+import bong.util.DateTimeUtil;
 
+/**
+ * Deals with loading tasks from the file and saving tasks in the file.
+ * File format (single-line per task):
+ *  T | done | description
+ *  D | done | description | yyyy-MM-dd HHmm
+ *  E | done | description | yyyy-MM-dd HHmm | yyyy-MM-dd HHmm
+ */
 public class Storage {
     private final Path filePath;
-
-    private static final DateTimeFormatter STORAGE_DATE_TIME_FORMAT =  
-        DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm"); 
-    
-    private static final DateTimeFormatter INPUT_DATE_TIME_FORMAT =
-        DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
 
     public Storage(String filePath) {
         assert filePath != null : "filePath must not be null";
@@ -57,56 +59,69 @@ public class Storage {
             if (line == null || line.trim().isEmpty()) {
                 continue;
             }
-            String[] parts = line.split("\\s*\\|\\s*", -1);
-            // Expect at least: type | done | description
-            if (parts.length < 3) {
-                ui.showStorageCorruptionWarning(line);
-                continue;
-            }
-            String type = parts[0].trim();
-            boolean done = parts[1].trim().equals("1") || parts[1].trim().equalsIgnoreCase("true");
-
             try {
-
-                switch (type) {
-                    case "T":
-                        Task todo = new Todo(parts[2].trim());
-                        if (done) {
-                            todo.setMark();
-                        }
-                        tasks.add(todo);
-                        break;
-                    case "D":
-                        if (parts.length < 4) {
-                            throw new IllegalArgumentException("missing deadline field");
-                        }
-                        LocalDateTime deadline = LocalDateTime.parse(parts[3].trim(), STORAGE_DATE_TIME_FORMAT);
-                        Deadline deadlineTask = new Deadline(parts[2].trim(), deadline.format(INPUT_DATE_TIME_FORMAT));
-                        if (done) {
-                            deadlineTask.setMark();
-                        }
-                        tasks.add(deadlineTask);
-                        break;
-                    case "E":
-                        if (parts.length < 5) {
-                            throw new IllegalArgumentException("missing event fields");
-                        }
-                        LocalDateTime start = LocalDateTime.parse(parts[3].trim(), STORAGE_DATE_TIME_FORMAT);
-                        LocalDateTime end = LocalDateTime.parse(parts[4].trim(), STORAGE_DATE_TIME_FORMAT);
-                        Event eventTask = new Event(parts[2].trim(), start.format(INPUT_DATE_TIME_FORMAT), end.format(INPUT_DATE_TIME_FORMAT));
-                        if (done) {
-                            eventTask.setMark();
-                        }
-                        tasks.add(eventTask);
-                        break;
-                    default:
-                        ui.showStorageCorruptionWarning(line);
-                }
-            } catch (Exception e ) {
-                ui.showStorageCorruptionWarning(line +  " (" + e.getMessage() + ")");
+                Task t = parseLineToTask(line);
+                tasks.add(t);
+            } catch (Exception e) {
+                ui.showStorageCorruptionWarning(line + " (" + e.getMessage() + ")");
             }
         }
         return tasks;
+    }
+
+    private Task parseLineToTask(String line) throws BongException {
+        String[] parts = line.split("\\s*\\|\\s*", -1);
+        // Expect at least: type | done | description
+        if (parts.length < 3) {
+            throw new IllegalArgumentException("invalid storage line: expected at least 3 parts");
+        }
+        String type = parts[0].trim();
+        boolean done = parts[1].trim().equals("1") || parts[1].trim().equalsIgnoreCase("true");
+
+        switch (type) {
+            case "T":
+                return createTodo(parts, done);
+            case "D":
+                return createDeadline(parts, done);
+            case "E":
+                return createEvent(parts, done);
+            default:
+                throw new IllegalArgumentException("Unknown task type: " + type);
+        }
+    }
+
+    private Task createTodo(String[] parts, boolean done) {
+        String description = parts[2].trim();
+        Task todo = new Todo(description);
+        if (done) {
+            todo.setMark();
+        }
+        return todo;
+    }
+
+    private Task createDeadline(String[] parts, boolean done) throws BongException {
+        if (parts.length < 4) {
+            throw new IllegalArgumentException("missing deadline field");
+        }
+        LocalDateTime deadline = LocalDateTime.parse(parts[3].trim(), DateTimeUtil.STORAGE);
+        Deadline deadlineTask = new Deadline(parts[2].trim(), deadline.format(DateTimeUtil.INPUT));
+        if (done) {
+            deadlineTask.setMark();
+        }
+        return deadlineTask;
+    }
+
+    private Task createEvent(String[] parts, boolean done) throws BongException {
+        if (parts.length < 5) {
+            throw new IllegalArgumentException("missing event fields");
+        }
+        LocalDateTime start = LocalDateTime.parse(parts[3].trim(), DateTimeUtil.STORAGE);
+        LocalDateTime end = LocalDateTime.parse(parts[4].trim(), DateTimeUtil.STORAGE);
+        Event eventTask = new Event(parts[2].trim(), start.format(DateTimeUtil.INPUT), end.format(DateTimeUtil.INPUT));
+        if (done) {
+            eventTask.setMark();
+        }
+        return eventTask;
     }
 
     /* 
@@ -142,11 +157,11 @@ public class Storage {
             return "T" + " | " + doneFlag + " | " + task.getDescription();
         } else if (task instanceof Deadline) {
             Deadline d = (Deadline) task;
-            return "D" + " | " + doneFlag + " | " + d.getDescription() + " | " + d.getDeadline().format(STORAGE_DATE_TIME_FORMAT);
+            return "D" + " | " + doneFlag + " | " + d.getDescription() + " | " + d.getDeadline().format(DateTimeUtil.STORAGE);
         } else if (task instanceof Event) {
             Event e = (Event) task;
             return "E" + " | " + doneFlag + " | " + e.getDescription() + " | " + 
-                e.getStart().format(STORAGE_DATE_TIME_FORMAT) + " | " + e.getEnd().format(STORAGE_DATE_TIME_FORMAT);
+                e.getStart().format(DateTimeUtil.STORAGE) + " | " + e.getEnd().format(DateTimeUtil.STORAGE);
         }
         return "T" + " | " + doneFlag + " | " + task.getDescription();
     }

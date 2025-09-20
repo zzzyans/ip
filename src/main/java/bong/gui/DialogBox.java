@@ -49,20 +49,6 @@ public class DialogBox extends HBox {
         Circle clip = new Circle(25, 25, 25);
         displayPicture.setClip(clip);
 
-//        // Styling for text label
-//        dialog.setStyle("-fx-text-fill: #5D4037; -fx-font-size: 14px; -fx-wrap-text: true;");
-//        dialog.setPadding(new Insets(5, 10, 5, 10));
-//        dialog.setMinHeight(Region.USE_PREF_SIZE);
-//
-//        // Styling for HBox itself
-//        this.setPadding(new Insets(10));
-//        this.setSpacing(10);
-//        this.setStyle(
-//            "-fx-background-color: #FFFACD; " +
-//            "-fx-border-color: #F0E68C; " +
-//            "-fx-border-width: 1; " +
-//            "-fx-border-radius: 5; "
-//        );
     }
 
     /**

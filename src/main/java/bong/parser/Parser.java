@@ -35,6 +35,8 @@ public class Parser {
         String commandWord = inputParts[0].toUpperCase();
         String arguments = inputParts.length > 1 ? inputParts[1].trim() : "";
 
+        assert commandWord != null : "commandWord should not be null after split";
+
         CommandType commandEnum;
 
         try {

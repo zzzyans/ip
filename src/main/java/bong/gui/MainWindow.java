@@ -50,7 +50,7 @@ public class MainWindow extends AnchorPane {
     public void setBongCore(BongCore b) {
         bongCore = b;
 
-        String welcomeMessage = bongCore.getResponse("list");
+        String welcomeMessage = bongCore.getWelcomeMessage();
         dialogContainer.getChildren().add(DialogBox.getBongDialog(welcomeMessage, bongImage));
     }
 

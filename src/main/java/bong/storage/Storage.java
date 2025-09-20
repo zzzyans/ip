@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +17,6 @@ import bong.task.Deadline;
 import bong.task.Event;
 import bong.task.Task;
 import bong.task.Todo;
-import bong.util.DateTimeUtil;
 
 /**
  * Deals with loading tasks from the file and saving tasks in the file.
@@ -101,8 +101,8 @@ public class Storage {
         if (parts.length < 4) {
             throw new IllegalArgumentException("missing deadline field");
         }
-        LocalDateTime deadline = LocalDateTime.parse(parts[3].trim(), DateTimeUtil.STORAGE);
-        Deadline deadlineTask = new Deadline(parts[2].trim(), deadline.format(DateTimeUtil.INPUT));
+        LocalDateTime deadline = LocalDateTime.parse(parts[3].trim(), STORAGE_DATE_TIME_FORMAT);
+        Deadline deadlineTask = new Deadline(parts[2].trim(), deadline.format(INPUT_DATE_TIME_FORMAT));
         if (done) {
             deadlineTask.setMark();
         }
@@ -113,9 +113,9 @@ public class Storage {
         if (parts.length < 5) {
             throw new IllegalArgumentException("missing event fields");
         }
-        LocalDateTime start = LocalDateTime.parse(parts[3].trim(), DateTimeUtil.STORAGE);
-        LocalDateTime end = LocalDateTime.parse(parts[4].trim(), DateTimeUtil.STORAGE);
-        Event eventTask = new Event(parts[2].trim(), start.format(DateTimeUtil.INPUT), end.format(DateTimeUtil.INPUT));
+        LocalDateTime start = LocalDateTime.parse(parts[3].trim(), STORAGE_DATE_TIME_FORMAT);
+        LocalDateTime end = LocalDateTime.parse(parts[4].trim(), STORAGE_DATE_TIME_FORMAT);
+        Event eventTask = new Event(parts[2].trim(), start.format(INPUT_DATE_TIME_FORMAT), end.format(INPUT_DATE_TIME_FORMAT));
         if (done) {
             eventTask.setMark();
         }
@@ -154,11 +154,11 @@ public class Storage {
             return "T" + " | " + doneFlag + " | " + task.getDescription();
         } else if (task instanceof Deadline) {
             Deadline d = (Deadline) task;
-            return "D" + " | " + doneFlag + " | " + d.getDescription() + " | " + d.getDeadline().format(DateTimeUtil.STORAGE);
+            return "D" + " | " + doneFlag + " | " + d.getDescription() + " | " + d.getDeadline().format(STORAGE_DATE_TIME_FORMAT);
         } else if (task instanceof Event) {
             Event e = (Event) task;
             return "E" + " | " + doneFlag + " | " + e.getDescription() + " | " + 
-                e.getStart().format(DateTimeUtil.STORAGE) + " | " + e.getEnd().format(DateTimeUtil.STORAGE);
+                e.getStart().format(STORAGE_DATE_TIME_FORMAT) + " | " + e.getEnd().format(STORAGE_DATE_TIME_FORMAT);
         }
         return "T" + " | " + doneFlag + " | " + task.getDescription();
     }

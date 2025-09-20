@@ -67,6 +67,15 @@ public class BongCore {
     }
 
     /**
+     * Returns the welcome message for initial text on GUI.
+     *
+     * @return The welcome string.
+     */
+    public String getWelcomeMessage() {
+        return "Hello! I'm Bong!\nWhat can I do for you?";
+    }
+
+    /**
      * Runs the console version of the Bong application.
      * This uses the shared core logic (getResponse) but handles console-specific input/output.
      */

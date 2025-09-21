@@ -77,4 +77,10 @@ public class SnoozeCommand extends Command {
             throw new BongException("Cannot snooze task type: only deadlines and events can be snoozed.");
         }
     }
+
+    private void snoozeDeadline(Deadline deadline, TaskList tasks, Storage storage) throws BongException {
+        LocalDateTime newDeadline = parseDate(newStartString, "new deadline");
+        deadline.setDeadline(newDeadline);
+        saveTasks(tasks, storage);
+    }
 }

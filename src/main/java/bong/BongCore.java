@@ -4,10 +4,13 @@ import bong.command.Command;
 import bong.exception.BongException;
 import bong.parser.Parser;
 import bong.storage.Storage;
+import bong.task.Task;
 import bong.task.TaskList;
 import bong.ui.Ui;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Encapsulates the core logic of the Bong task management application.
@@ -37,12 +40,19 @@ public class BongCore {
     public BongCore() {
         ui = new Ui();
         storage = new Storage(FILE_PATH);
+
+        List<Task> loaded = null;
         try {
-            tasks = new TaskList(storage.loadTasks(ui));
+            loaded = storage.loadTasks(ui);
         } catch (IOException e) {
             ui.showLoadingError("Failed to load tasks: " + e.getMessage());
-            tasks = new TaskList();
         }
+
+        if (loaded == null) {
+            loaded = new ArrayList<>();
+        }
+
+        tasks = new TaskList(loaded);
         assert ui != null && storage != null && tasks != null : "core components must be initialised";
     }
 

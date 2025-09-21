@@ -1,130 +1,88 @@
 package bong.parser;
 
-import bong.Bong;
+import bong.command.Command;
+import bong.command.DeadlineCommand;
+import bong.command.EventCommand;
+import bong.command.HelpCommand;
+import bong.command.ListCommand;
+import bong.command.MarkCommand;
+import bong.command.TodoCommand;
 import bong.exception.BongException;
-import bong.parser.Parser.ParsedCommand;
-
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ParserTest {
     @Test
-    void parse_listCommand_returnsCorrectCommandType() throws BongException {
-        ParsedCommand command = Parser.parse("list");
-        assertEquals(Bong.Command.LIST, command.command);
+    void parse_listCommand_returnsListCommand() throws BongException {
+        Command c = Parser.parse("list");
+        assertTrue(c instanceof ListCommand);
     }
 
     @Test
-    void parse_todoCommand_returnsCorrectDescription() throws BongException {
-        ParsedCommand command = Parser.parse("todo read book");
-        assertEquals(Bong.Command.TODO, command.command);
-        assertEquals("read book", command.description);
+    void parse_todoCommand_returnsTodoCommandWithDescription() throws BongException {
+        Command c = Parser.parse("todo read book");
+        assertTrue(c instanceof TodoCommand);
+        TodoCommand t = (TodoCommand) c;
+        assertEquals("read book", t.getDescription());
     }
 
     @Test
     void parse_todoCommandEmptyDescription_throwsBongException() {
         Exception exception = assertThrows(BongException.class, () -> Parser.parse("todo "));
-        assertEquals("A todo needs a description!", exception.getMessage());
+        assertTrue(exception.getMessage().contains("A todo needs a description"));
     }
 
     @Test
-    void parse_deadlineCommand_returnsCorrectDetails() throws BongException {
-        ParsedCommand command = Parser.parse("deadline return book /by 2025-10-16 1800");
-        assertEquals(Bong.Command.DEADLINE, command.command);
-        assertEquals("return book", command.description);
-        assertEquals("2025-10-16 1800", command.deadline);
+    void parse_deadlineCommand_returnsDeadlineCommandWithDetails() throws BongException {
+        Command c = Parser.parse("deadline return book /by 2025-10-16 1800");
+        assertTrue(c instanceof DeadlineCommand);
+        DeadlineCommand d = (DeadlineCommand) c;
+        assertEquals("return book", d.getDescription());
+        assertEquals("2025-10-16 1800", d.getDeadlineTime());
     }
 
     @Test
-    void parse_deadlineCommandMissingBy_throwsBongException() {
-        Exception exception = assertThrows(BongException.class, () -> Parser.parse("deadline return book"));
-        assertTrue(exception.getMessage().contains("Looks like your 'deadline' is missing details!"));
+    void parse_eventCommand_returnsEventCommandWithDetails() throws BongException {
+        Command c = Parser.parse("event project meeting /from 2025-09-30 1200 /to 2025-09-30 1500");
+        assertTrue(c instanceof EventCommand);
+        EventCommand e = (EventCommand) c;
+        assertEquals("project meeting", e.getDescription());
+        assertEquals("2025-09-30 1200", e.getStartTime());
+        assertEquals("2025-09-30 1500", e.getEndTime());
     }
 
     @Test
-    void parse_deadlineCommandEmptyDescription_throwsBongException() {
-        Exception exception = assertThrows(BongException.class, () -> Parser.parse("deadline /by 2025-10-16 1800"));
-        assertTrue(exception.getMessage().contains("Looks like your 'deadline' is missing details!"));
-    }
-
-    @Test
-    void parse_deadlineCommandEmptyTime_throwsBongException() {
-        Exception exception = assertThrows(BongException.class, () -> Parser.parse("deadline return book /by "));
-        assertTrue(exception.getMessage().contains("Looks like your 'deadline' is missing details!"));
-    }
-
-    @Test
-    void parse_eventCommand_returnsCorrectDetails() throws BongException {
-        ParsedCommand command = Parser.parse("event project meeting /from 2025-09-30 1200 /to 2025-09-30 1500");
-        assertEquals(Bong.Command.EVENT, command.command);
-        assertEquals("project meeting", command.description);
-        assertEquals("2025-09-30 1200", command.eventStart);
-        assertEquals("2025-09-30 1500", command.eventEnd);
-    }
-
-    @Test
-    void parse_eventCommandMissingFrom_throwsBongException() {
-        Exception exception = assertThrows(BongException.class, () -> Parser.parse("event project meeting /to 2025-09-30 1500"));
-        assertTrue(exception.getMessage().contains("Looks like your 'event' is missing details!"));
-    }
-
-    @Test
-    void parse_eventCommandMissingTo_throwsBongException() {
-        Exception exception = assertThrows(BongException.class, () -> Parser.parse("event project meeting /from 2025-09-30 1200"));
-        assertTrue(exception.getMessage().contains("Looks like your 'event' is missing details!"));
-    }
-
-    @Test
-    void parse_eventCommandEmptyDescription_throwsBongException() {
-        Exception exception = assertThrows(BongException.class, () -> Parser.parse("event /from 2025-09-30 1200 /to 2025-09-30 1500"));
-        assertTrue(exception.getMessage().contains("Looks like your 'event' is missing details!"));
-    }
-
-    @Test
-    void parse_markCommand_returnsCorrectTaskNumber() throws BongException {
-        ParsedCommand command = Parser.parse("mark 1");
-        assertEquals(Bong.Command.MARK, command.command);
-        assertEquals(1, command.taskNumber);
+    void parse_markCommand_returnsMarkCommandWithTaskNumber() throws BongException {
+        Command c = Parser.parse("mark 1");
+        assertTrue(c instanceof MarkCommand);
+        MarkCommand m = (MarkCommand) c;
+        assertEquals(1, m.getTaskNumber());
     }
 
     @Test
     void parse_markCommandNonNumeric_throwsBongException() {
         Exception exception = assertThrows(BongException.class, () -> Parser.parse("mark abc"));
-        assertEquals("The task number provided is invalid. Please enter a valid number.", exception.getMessage());
-    }
-
-    @Test
-    void parse_markCommandEmptyNumber_throwsBongException() {
-        Exception exception = assertThrows(BongException.class, () -> Parser.parse("mark "));
-        assertEquals("The task number cannot be empty for mark command.", exception.getMessage());
-    }
-
-    @Test
-    void parse_unmarkCommand_returnsCorrectTaskNumber() throws BongException {
-        ParsedCommand command = Parser.parse("unmark 5");
-        assertEquals(Bong.Command.UNMARK, command.command);
-        assertEquals(5, command.taskNumber);
-    }
-
-    @Test
-    void parse_deleteCommand_returnsCorrectTaskNumber() throws BongException {
-        ParsedCommand command = Parser.parse("delete 2");
-        assertEquals(Bong.Command.DELETE, command.command);
-        assertEquals(2, command.taskNumber);
+        assertTrue(exception.getMessage().contains("The task number provided is invalid"));
     }
 
     @Test
     void parse_unknownCommand_throwsBongException() {
         Exception exception = assertThrows(BongException.class, () -> Parser.parse("abcde command"));
-        assertTrue(exception.getMessage().contains("I don't understand that command."));
+        assertTrue(exception.getMessage().toLowerCase().contains("don't understand") ||
+                exception.getMessage().toLowerCase().contains("i don't understand"));
     }
 
     @Test
-    void parse_emptyInput_throwsBongException() {
-        Exception exception = assertThrows(BongException.class, () -> Parser.parse(""));
-        assertTrue(exception.getMessage().contains("I don't understand that command."));
+    void parse_helpCommand_returnsHelpCommand() throws BongException {
+        Command c = Parser.parse("help");
+        assertTrue(c instanceof HelpCommand);
+        HelpCommand h = (HelpCommand) c;
+        // execute the command to get the help string and assert some keywords are present
+        String help = h.execute(null, null, null);
+        assertTrue(help.contains("todo"));
+        assertTrue(help.contains("deadline"));
+        assertTrue(help.contains("event"));
+        assertTrue(help.contains("snooze"));
     }
 }

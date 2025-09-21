@@ -23,6 +23,10 @@ public class FindCommand extends Command {
         this.keyword = keyword;
     }
 
+    public String getKeyword() {
+        return this.keyword;
+    }
+    
     /**
      * Executes the find command.
      * Searches the TaskList for tasks containing the keyword and returns a formatted string

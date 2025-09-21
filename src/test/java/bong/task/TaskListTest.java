@@ -102,7 +102,7 @@ public class TaskListTest {
     @Test
     void unmarkTask_validIndex_taskIsDone() throws BongException {
         Task task = new Todo("Marked Task");
-        task.mark();
+        task.setMark();
         taskList.addTask(task);
         assertTrue(task.isDone());
 

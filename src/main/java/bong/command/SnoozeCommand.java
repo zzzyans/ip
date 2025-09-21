@@ -94,4 +94,15 @@ public class SnoozeCommand extends Command {
         event.setEnd(newEnd);
         saveTasks(tasks, storage);
     }
+
+    private LocalDateTime parseDate(String value, String fieldDescription) throws BongException {
+        if (value == null || value.isBlank()) {
+            throw new BongException("Snooze requires a non-empty " + fieldDescription + " in 'yyyy-MM-dd HHmm' format.");
+        }
+        try {
+            return LocalDateTime.parse(value, DateTimeUtil.INPUT);
+        } catch (DateTimeParseException e) {
+            throw new BongException("Invalid date/time format for " + fieldDescription + ". Use 'yyyy-MM-dd HHmm'.");
+        }
+    }
 }

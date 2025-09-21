@@ -105,4 +105,12 @@ public class SnoozeCommand extends Command {
             throw new BongException("Invalid date/time format for " + fieldDescription + ". Use 'yyyy-MM-dd HHmm'.");
         }
     }
+
+    private void saveTasks(TaskList tasks, Storage storage) throws BongException {
+        try {
+            storage.saveTasks(tasks.getTasks());
+        } catch (IOException e) {
+            throw new BongException("Failed to save tasks after snooze: " + e.getMessage());
+        }
+    }
 }

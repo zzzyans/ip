@@ -83,4 +83,15 @@ public class SnoozeCommand extends Command {
         deadline.setDeadline(newDeadline);
         saveTasks(tasks, storage);
     }
+
+    private void snoozeEvent(Event event, TaskList tasks, Storage storage) throws BongException {
+        if (newEndString == null || newEndString.isBlank()) {
+            throw new BongException("Snoozing an event requires both new start and end times.");
+        }
+        LocalDateTime newStart = parseDate(newStartString, "event start");
+        LocalDateTime newEnd = parseDate(newEndString, "event end");
+        event.setStart(newStart);
+        event.setEnd(newEnd);
+        saveTasks(tasks, storage);
+    }
 }

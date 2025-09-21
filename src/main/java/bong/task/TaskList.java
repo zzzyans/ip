@@ -13,7 +13,6 @@ public class TaskList {
      */
     public TaskList() {
         this.tasks = new ArrayList<>();
-        assert this.tasks != null : "tasks list must be initialised";
     }
 
     /*
@@ -23,7 +22,6 @@ public class TaskList {
      * @param tasks The initial list of tasks.
      */
     public TaskList(List<Task> tasks) {
-        assert this.tasks != null : "initial tasks argument must not be null";
         this.tasks = tasks;
     }
 

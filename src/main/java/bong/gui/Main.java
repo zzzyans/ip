@@ -16,13 +16,13 @@ import javafx.stage.Stage;
  */
 public class Main extends Application {
 
-    private BongCore bongCore = new BongCore();
+    private BongCore bongCore;
 
     @Override
     public void start(Stage stage) {
         try {
+            bongCore = new BongCore();
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/view/MainWindow.fxml"));
-            assert fxmlLoader.getController() != null : "FXML controller must be injected";
 
             AnchorPane ap = fxmlLoader.load();
             Scene scene = new Scene(ap);
@@ -30,7 +30,7 @@ public class Main extends Application {
             stage.setTitle("Bong");
             stage.setMinHeight(220);
             stage.setMinWidth(417);
-            fxmlLoader.<MainWindow>getController().setBongCore(bongCore);  // inject the Duke instance
+            fxmlLoader.<MainWindow>getController().setBongCore(bongCore);
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();

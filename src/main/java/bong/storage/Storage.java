@@ -45,6 +45,7 @@ public class Storage {
     public List<Task> loadTasks(Ui ui) throws IOException {
         assert ui != null : "Ui must not be null when loading tasks";
         List<Task> tasks = new ArrayList<>();
+
         Path parent = filePath.getParent();
         if (parent != null && Files.notExists(parent)) {
             Files.createDirectories(parent);
@@ -61,7 +62,9 @@ public class Storage {
             }
             try {
                 Task t = parseLineToTask(line);
-                tasks.add(t);
+                if (t != null) {
+                    tasks.add(t);
+                }
             } catch (Exception e) {
                 ui.showStorageCorruptionWarning(line + " (" + e.getMessage() + ")");
             }

@@ -4,14 +4,12 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
 import javafx.scene.shape.Circle;
 
 import java.io.IOException;
@@ -78,11 +76,35 @@ public class DialogBox extends HBox {
         return db;
     }
 
+    /**
+     * Creates a DialogBox for Bong message, styled and aligned to the left.
+     *
+     * @param text The message text from Bong.
+     * @param img Bong's display picture.
+     * @return A DialogBox instance configured for Bong's message.
+     */
     public static DialogBox getBongDialog(String text, Image img) {
         assert text != null : "dialog text must not be null";
         assert img != null : "image must not be null";
         DialogBox db = new DialogBox(text, img);
         db.flip();
+        return db;
+    }
+
+    /**
+     * Creates a DialogBox that highlights an error message, styled and aligned to the left.
+     *
+     * @param text
+     * @param img
+     * @return
+     */
+    public static DialogBox getErrorDialog(String text, Image img) {
+        DialogBox db = new DialogBox(text, img);
+        db.getChildren().setAll(db.displayPicture, db.dialog);
+        db.setAlignment(Pos.TOP_LEFT);
+        db.dialog.getStyleClass().remove("reply-label");
+        db.dialog.getStyleClass().add("error-label");
+        db.getStyleClass().add("error-box");
         return db;
     }
 }

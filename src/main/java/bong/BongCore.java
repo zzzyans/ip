@@ -21,7 +21,7 @@ public class BongCore {
     /**
      * Represents the supported user command types in the Bong application.
      */
-    public static enum CommandType {
+    public enum CommandType {
         LIST, MARK, UNMARK, TODO, DEADLINE, EVENT, DELETE, FIND, SNOOZE, HELP, BYE, UNKNOWN
     }
 

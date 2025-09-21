@@ -62,19 +62,27 @@ public class MainWindow extends AnchorPane {
     @FXML
     private void handleUserInput() {
         String input = userInput.getText();
-        if (input.isEmpty()) {
+        if (input == null || input.isEmpty()) {
             return;
         }
 
-        dialogContainer.getChildren().addAll(
+        dialogContainer.getChildren().add(
                 DialogBox.getUserDialog(input, userImage)
         );
 
         String response = bongCore.getResponse(input);
 
-        dialogContainer.getChildren().addAll(
-                DialogBox.getBongDialog(response, bongImage)
-        );
+        boolean isError = false;
+        String lower = response.toLowerCase();
+        if (lower.startsWith("error:") || lower.contains("unexpected error")) {
+            isError = true;
+        }
+
+        if (isError) {
+            dialogContainer.getChildren().add(DialogBox.getErrorDialog(response, bongImage));
+        } else {
+            dialogContainer.getChildren().add(DialogBox.getBongDialog(response, bongImage));
+        }
 
         userInput.clear();
 

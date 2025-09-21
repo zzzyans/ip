@@ -1,7 +1,6 @@
 package bong.task;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 import bong.exception.BongException;
@@ -46,6 +45,26 @@ public class Event extends Task {
 
     public LocalDateTime getEnd() {
         return this.end;
+    }
+
+    /**
+     * Sets a new start time for this event.
+     *
+     * @param newStart The new start time.
+     */
+    public void setStart(LocalDateTime newStart) {
+        assert newStart != null : "new start time must not be null";
+        this.start = newStart;
+    }
+
+    /**
+     * Sets a new end time for the event.
+     *
+     * @param newEnd The new end time.
+     */
+    public void setEnd(LocalDateTime newEnd) {
+        assert newEnd != null : "new end time must not be null";
+        this.end = newEnd;
     }
 
     @Override

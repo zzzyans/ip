@@ -2,7 +2,6 @@ package bong.task;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
-import java.util.Date;
 
 import bong.exception.BongException;
 import bong.util.DateTimeUtil;
@@ -34,6 +33,16 @@ public class Deadline extends Task {
 
     public LocalDateTime getDeadline() {
         return this.deadline;
+    }
+
+    /**
+     * Sets a new deadline for this task.
+     *
+     * @param newDeadline The new deadline.
+     */
+    public void setDeadline(LocalDateTime newDeadline) {
+        assert newDeadline != null : "new deadline must not be null";
+        this.deadline = newDeadline;
     }
 
     @Override

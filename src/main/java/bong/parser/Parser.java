@@ -10,6 +10,7 @@ import bong.command.ExitCommand;
 import bong.command.FindCommand;
 import bong.command.ListCommand;
 import bong.command.MarkCommand;
+import bong.command.SnoozeCommand;
 import bong.command.TodoCommand;
 import bong.command.UnmarkCommand;
 import bong.exception.BongException;
@@ -54,6 +55,7 @@ public class Parser {
             case DEADLINE -> parseDeadlineCommand(arguments);
             case EVENT -> parseEventCommand(arguments);
             case FIND -> parseFindCommand(arguments);
+            case SNOOZE -> parseSnoozeCommand(arguments);
             default -> throw new BongException("An unexpected command type was encountered during parsing.");
         };
     }
@@ -156,5 +158,48 @@ public class Parser {
             throw new BongException("The 'find' command needs a keyword to search for!");
         }
         return new FindCommand(arguments);
+    }
+
+    /**
+     * Parses a 'snooze' command.
+     *
+     * @param arguments The arguments string containing the new deadline/start time and end time.
+     * @return A SnoozeCommand object for snoozing tasks.
+     * @throws BongException If the snooze command is missing details.
+     */
+    private static Command parseSnoozeCommand(String arguments) throws BongException {
+        if (arguments.isEmpty()) {
+            throw new BongException("The 'snooze' command needs a new deadline/start time and end time!" +
+                    " Try 'snooze <task number> /to <yyyy-MM-dd HHmm> (/end <yyyy-MM-dd HHmm>)'");
+        }
+        String[] parts = arguments.split(" ", 2);
+        if (parts.length < 2) {
+            throw new BongException("Usage: snooze <taskNumber> /to <yyyy-MM-dd HHmm> [ /end <yyyy-MM-dd HHmm> ]");
+        }
+        int taskNumber;
+        try {
+            taskNumber = Integer.parseInt(parts[0]);
+        } catch (NumberFormatException e) {
+            throw new BongException("    The task number provided is invalid. Please enter a valid number.");
+        }
+
+        String rest = parts[1].trim();
+        String endPart = null;
+        String[] endSplit = rest.split(" /end ", 2);
+        String toPart = endSplit[0].trim();
+        if (endSplit.length == 2) {
+            endPart = endSplit[1].trim();
+        }
+
+        String toPrefix = "/to ";
+        if (!toPart.startsWith(toPrefix)) {
+            throw new BongException("Snooze requires '/to <yyyy-MM-dd HHmm>' for new deadline/start time.");
+        }
+        String newStartString = toPart.substring(toPrefix.length()).trim();
+        if (newStartString.isEmpty()) {
+            throw new BongException("Snooze requires a non-empty new datetime after /to.");
+        }
+
+        return new SnoozeCommand(taskNumber, newStartString, (endPart != null && !endPart.isEmpty()) ? endPart : null);
     }
 }

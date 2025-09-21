@@ -24,6 +24,10 @@ public class MarkCommand extends Command {
         this.taskNumber = taskNumber;
     }
 
+    public int getTaskNumber() {
+        return this.taskNumber;
+    }
+
     /**
      * Executes the mark command.
      * Marks the specified task as done, saves the updated list to storage,

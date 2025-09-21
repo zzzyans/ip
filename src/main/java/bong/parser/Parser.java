@@ -8,6 +8,7 @@ import bong.command.DeadlineCommand;
 import bong.command.EventCommand;
 import bong.command.ExitCommand;
 import bong.command.FindCommand;
+import bong.command.HelpCommand;
 import bong.command.ListCommand;
 import bong.command.MarkCommand;
 import bong.command.SnoozeCommand;
@@ -56,6 +57,7 @@ public class Parser {
             case EVENT -> parseEventCommand(arguments);
             case FIND -> parseFindCommand(arguments);
             case SNOOZE -> parseSnoozeCommand(arguments);
+            case HELP -> new HelpCommand();
             default -> throw new BongException("An unexpected command type was encountered during parsing.");
         };
     }
@@ -174,7 +176,7 @@ public class Parser {
         }
         String[] parts = arguments.split(" ", 2);
         if (parts.length < 2) {
-            throw new BongException("Usage: snooze <taskNumber> /to <yyyy-MM-dd HHmm> [ /end <yyyy-MM-dd HHmm> ]");
+            throw new BongException("Try 'snooze <task number> /to <yyyy-MM-dd HHmm> (/end <yyyy-MM-dd HHmm>)'");
         }
         int taskNumber;
         try {

@@ -9,6 +9,8 @@ import bong.task.Deadline;
  */
 public class DeadlineCommand extends AddCommand {
 
+    private final String deadlineTimeStr;
+
     /**
      * Constructs a DeadlineCommand with the given description and deadline.
      *
@@ -18,5 +20,14 @@ public class DeadlineCommand extends AddCommand {
      */
     public DeadlineCommand(String description, String deadline) throws BongException {
         super(new Deadline(description, deadline));
+        this.deadlineTimeStr = deadline;
+    }
+
+    public String getDescription() {
+        return this.newTask.getDescription();
+    }
+
+    public String getDeadlineTime() {
+        return this.deadlineTimeStr;
     }
 }

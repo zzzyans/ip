@@ -9,6 +9,9 @@ import bong.task.Event;
  */
 public class EventCommand extends AddCommand {
 
+    private final String startStr;
+    private final String endStr;
+
     /**
      * Constructs an EventCommand with the given description, start time and end time.
      *
@@ -19,5 +22,19 @@ public class EventCommand extends AddCommand {
      */
     public EventCommand(String description, String start, String end) throws BongException {
         super(new Event(description, start, end));
+        this.startStr = start;
+        this.endStr = end;
+    }
+
+    public String getDescription() {
+        return this.newTask.getDescription();
+    }
+
+    public String getStartTime() {
+        return this.startStr;
+    }
+
+    public String getEndTime() {
+        return this.endStr;
     }
 }
